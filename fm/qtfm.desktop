@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=QtFM
+GenericName=Qt File Manager
+Comment=Qt File Manager
+Type=Application
+Icon=qtfm
+Exec=qtfm
+Terminal=false
+MimeType=application/x-directory;inode/directory
+Categories=Utility;FileManager
+StartupNotify=false

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=QtFM Device Manager
+Comment=QtFM Device Manager
+Icon=qtfm
+Exec=qtfm-tray
+Terminal=false
+Type=Application
+OnlyShowIn=Lumina;
+StartupNotify=false
