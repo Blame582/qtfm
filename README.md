@@ -81,7 +81,7 @@ cd qtfm-6.2.x
 
 Or use git:
 ```
-git clone -b 6.2 https://github.com/rodlie/qtfm
+git clone -b 6.2 https://github.com/blame582/qtfm
 cd qtfm
 ```
 
