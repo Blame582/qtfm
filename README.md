@@ -50,7 +50,7 @@ All shortcuts can be modified.
 
 ## Build
 
-Download the latest [release](https://github.com/rodlie/qtfm/releases), then make sure you have the required dependencies.
+Download the latest [release](https://github.com/blame582/qtfm/releases), then make sure you have the required dependencies.
 
 * Requires [Qt](http://qt.io) 6.11.2
   * Qt6 Widgets
