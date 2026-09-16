@@ -1,3 +1,22 @@
+6.3.0 - Qt6 Maintenance and Improvements.  16-Sept 2026
+- Fixed actionMapper() selection handling.
+- Replaced legacy foreach loops with C++ range-based loops.
+- Fixed Qt6 compilation errors in actionMapper().
+- Cleaned up Qt6 compiler compatibility issues.
+- Verified ImageMagick 7 thumbnail support.
+- Verified FFmpeg video thumbnail support.
+- Verified successful Qt6 build.
+
+6.2.1 - QT6 Port and modernization release.  12-Sept 2026
+- Ported QtFM to Qt 6
+- Updated build system/dependencies for Qt6
+- Updated documentation for Qt6
+- Updated icon-theme documentation
+- Updated ImageMagick support
+- Updated FFmpeg support
+- Removed obsolete Qt5 requirements
+- Bug fixes and cleanup
+
 6.2.1 05-June 2021
 - fix remove symlink bug (thanks to @ferion11)
 - fix build with Qt 5.15 (thanks to @a17r)

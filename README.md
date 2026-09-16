@@ -50,23 +50,23 @@ All shortcuts can be modified.
 
 ## Build
 
-Download the latest [release](https://github.com/rodlie/qtfm/releases), then make sure you have the required dependencies.
+Download the latest [release](https://github.com/blame582/qtfm/releases), then make sure you have the required dependencies.
 
-* Requires [Qt](http://qt.io) 5.2+ (5.6.3/5.9.7/5.12.x recommended)
-  * libQt5Widgets
-  * libQt5Gui
-  * libQt5Concurrent
-  * libQt5DBus
-  * libQt5Core
+* Requires [Qt](http://qt.io) 6.11.2
+  * Qt6 Widgets
+  * Qt6 Gui
+  * Qt6 Concurrent
+  * Qt6 DBus
+  * Qt6 Core
 * Requires [hicolor-icon-theme](https://www.freedesktop.org/wiki/Software/icon-theme/)
-* Requires [adwaita-icon-theme](https://github.com/GNOME/adwaita-icon-theme) or similar
+* Requires [Breeze Icons](https://github.com/KDE/breeze-icons) or another freedesktop.org-compatible icon theme
 * Requires [libinotify](https://github.com/libinotify-kqueue/libinotify-kqueue) *if using BSD/macOS*
 * Recommended [udisks](https://www.freedesktop.org/wiki/Software/udisks/)/[bsdisks](https://www.freshports.org/sysutils/bsdisks/) at run-time
-* Recommended [ImageMagick (Magick++)](http://imagemagick.org) 6.9/7.x for improved thumbnail support
-  * libMagick++
-  * libMagickWand
-  * libMagickCore
-* Recommended [FFmpeg](https://ffmpeg.org) 3+ for video/audio thumbnails/coverart
+* Recommended [ImageMagick](https://imagemagick.org/) 7.1.x for improved thumbnail support
+  * Magick++
+  * MagickWand
+  * MagickCore
+* Recommended [FFmpeg](https://ffmpeg.org/) 9.x for video/audio thumbnails/cover art
   * libavdevice
   * libswscale
   * libavformat
@@ -81,7 +81,7 @@ cd qtfm-6.2.x
 
 Or use git:
 ```
-git clone -b 6.2 https://github.com/rodlie/qtfm
+git clone -b 6.2 https://github.com/blame582/qtfm
 cd qtfm
 ```
 
@@ -119,8 +119,4 @@ Same as above, but you should use ``PREFIX=`` and ``INSTALL_ROOT=``.
 
 Example:
 
-```
-qmake PREFIX=/usr CONFIG+=with_magick CONFIG+=with_ffmpeg ..
-make -jX
-make INSTALL_ROOT=<package> install
-```
+``

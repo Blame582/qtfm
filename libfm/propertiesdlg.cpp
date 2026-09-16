@@ -357,7 +357,7 @@ void PropertiesDialog::checkboxesChanged()
 //---------------------------------------------------------------------------
 void PropertiesDialog::numericChanged(QString text)
 {
-    if(text.count() != 3) return;
+    if (text.size() != 3) return;
 
     int owner = QString(text.at(0)).toInt();
     ownerRead->setChecked(owner / 4);

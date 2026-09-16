@@ -34,7 +34,6 @@ CONFIG(staticlib) {
         $${top_srcdir}/libfm/mimeutils.cpp
     HEADERS += \
         $${top_srcdir}/libfm/disks.h \
-        $${top_srcdir}/libfm/disks.h \
         $${top_srcdir}/libfm/udisks2.h \
         $${top_srcdir}/libfm/fileutils.h \
         $${top_srcdir}/libfm/desktopfile.h \

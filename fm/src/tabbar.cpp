@@ -63,34 +63,41 @@ void tabBar::dragEnterEvent(QDragEnterEvent *event)
 //---------------------------------------------------------------------------
 void tabBar::dragMoveEvent(QDragMoveEvent *event)
 {
-    this->setCurrentIndex(tabAt(event->pos()));
+    this->setCurrentIndex(tabAt(event->position().toPoint()));
     event->acceptProposedAction();
 }
 
 //---------------------------------------------------------------------------
+
 void tabBar::dropEvent(QDropEvent *event)
 {
     QList<QUrl> paths = event->mimeData()->urls();
     QFileInfo file = QFileInfo(paths.at(0).path());
 
-    if(tabAt(event->pos()) == -1 && file.isDir())           //new tab
-        addNewTab(file.filePath(),0);
-    else
-    {
+    if (tabAt(event->position().toPoint()) == -1 && file.isDir()) {
+        // New tab.
+        addNewTab(file.filePath(), 0);
+    } else {
         QStringList cutList;
 
-        //don't do anything if you drag and drop in same folder
-        if(file.canonicalPath() == tabData(currentIndex()).toString())
-        {
+        // Don't do anything if you drag and drop in the same folder.
+        if (file.canonicalPath() == tabData(currentIndex()).toString()) {
             event->ignore();
             return;
         }
 
-        if(event->proposedAction() == 2)                             //cut, holding ctrl to copy is action 1
-            foreach(QUrl item, paths)
+        // Cut, holding Ctrl to copy is action 1.
+        if (event->proposedAction() == 2) {
+            for (const QUrl &item : paths) {
                 cutList.append(item.path());
+            }
+        }
 
-        emit dragDropTab(event->mimeData(), tabData(currentIndex()).toString(), cutList);
+        emit dragDropTab(
+            event->mimeData(),
+            tabData(currentIndex()).toString(),
+            cutList
+            );
     }
 
     event->acceptProposedAction();

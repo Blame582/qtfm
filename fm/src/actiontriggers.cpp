@@ -422,7 +422,11 @@ void MainWindow::cutFile() {
 
   // Save a temp file to allow pasting in a different instance
   QFile tempFile(QDir::tempPath() + QString("/%1.temp").arg(APP));
-  tempFile.open(QIODevice::WriteOnly);
+
+  if (!tempFile.open(QIODevice::WriteOnly)) {
+      return;
+  }
+
   QDataStream out(&tempFile);
   out << fileList;
   tempFile.close();
@@ -727,8 +731,13 @@ bool MainWindow::cutCopyFile(const QString &src, QString dst, qint64 totalSize,
   //if (dst.length() > 50) dst = "/.../" + dst.split(QDir::separator()).last();
 
   // Open source and destination files
-  srcFile.open(QFile::ReadOnly);
-  dstFile.open(QFile::WriteOnly);
+  if (!srcFile.open(QFile::ReadOnly)) {
+      return false;
+  }
+
+  if (!dstFile.open(QFile::WriteOnly)) {
+      return false;
+  }
 
   // Determine buffer size, calculate size of file and number of steps
   char block[4096];
@@ -763,52 +772,80 @@ bool MainWindow::cutCopyFile(const QString &src, QString dst, qint64 totalSize,
 }
 //---------------------------------------------------------------------------
 
-/**
- * @brief Creates symbolic links to files
- * @param files
- * @param newPath
- * @return true if link creation was successfull
+    /**
+ * @brief Creates symbolic links to files in the destination directory.
+ * @param files List of files to link.
+ * @param newPath Destination directory.
+ * @return true if all links were created successfully, false otherwise.
  */
-bool MainWindow::linkFiles(const QList<QUrl> &files, const QString &newPath) {
-
-  // Quit if folder not writable
-  if (!QFileInfo(newPath).isWritable()
-      || newPath == QDir(files.at(0).toLocalFile()).path())
-  {
-      QMessageBox::warning(this, tr("Folder not writable"), tr("The destination folder (%1) is not writable").arg(newPath));
-      return false;
-  }
-
-  // TODO: even if symlinks are small we have to make sure that we have space
-  // available for links
-
-  // Main loop
-  for (int i = 0; i < files.count(); ++i) {
-
-    // Choose destination file name and url
-    QFile file(files.at(i).toLocalFile());
-    QFileInfo temp(file);
-    QString destName = temp.fileName();
-    QString destUrl = newPath + QDir::separator() + destName;
-
-    // Only do 'Link(x) of' if same folder
-    if (temp.path() == newPath) {
-      int num = 1;
-      while (QFile(destUrl).exists()) {
-        destName = QString("Link (%1) of %2").arg(num).arg(temp.fileName());
-        destUrl = newPath + QDir::separator() + destName;
-        num++;
-      }
+    bool MainWindow::linkFiles(const QList<QUrl> &files, const QString &newPath)
+{
+    // Nothing to link.
+    if (files.isEmpty()) {
+        return false;
     }
 
-    // If file does not exists then create link
-    QFileInfo dName(destUrl);
-    if (!dName.exists()) {
-      file.link(destUrl);
+    // Check that the destination exists and can be written to.
+    QFileInfo destInfo(newPath);
+    if (!destInfo.exists() || !destInfo.isDir() || !destInfo.isWritable()) {
+        QMessageBox::warning(
+            this,
+            tr("Folder not writable"),
+            tr("The destination folder (%1) is not writable").arg(newPath)
+            );
+        return false;
     }
-  }
-  return true;
+
+    // Prevent creating a link in the same directory as the source.
+    QFileInfo first(files.first().toLocalFile());
+    if (first.path() == newPath) {
+        QMessageBox::warning(
+            this,
+            tr("Link files"),
+            tr("Cannot create links in the same folder.")
+            );
+        return false;
+    }
+
+    // Assume success until a link fails.
+    bool success = true;
+
+    // Create a symbolic link for each selected file.
+    for (const QUrl &url : files) {
+
+        // Get information about the source file.
+        QFileInfo source(url.toLocalFile());
+
+        // Keep the original filename for the link.
+        QString destName = source.fileName();
+
+        // Build the complete destination path.
+        QString destPath = QDir(newPath).filePath(destName);
+
+        // Do not overwrite an existing file or link.
+        if (QFileInfo::exists(destPath)) {
+            continue;
+        }
+
+        // Create the symbolic link.
+        QFile file(source.filePath());
+
+        if (!file.link(destPath)) {
+            // Record the failure but continue creating the remaining links.
+            success = false;
+
+            qDebug() << "Failed to create symbolic link:"
+                     << source.filePath()
+                     << "->"
+                     << destPath
+                     << file.errorString();
+        }
+    }
+
+    // Report whether every requested link was created successfully.
+    return success;
 }
+
 //---------------------------------------------------------------------------
 
 /**

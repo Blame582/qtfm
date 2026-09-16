@@ -1,23 +1,33 @@
 QTFM_TARGET = qtfm
 QTFM_TARGET_NAME = "QtFM"
+
 QTFM_MAJOR = 6
-QTFM_MINOR = 2
-QTFM_PATCH = 1
+QTFM_MINOR = 3
+QTFM_PATCH = 0
 
 QMAKE_TARGET_COMPANY = "$${QTFM_TARGET_NAME}"
 QMAKE_TARGET_PRODUCT = "$${QTFM_TARGET_NAME}"
 QMAKE_TARGET_DESCRIPTION = "$${QTFM_TARGET_NAME}"
 QMAKE_TARGET_COPYRIGHT = "Copyright $${QTFM_TARGET_NAME} developers"
 
+# Qt 6 is required.
+lessThan(QT_MAJOR_VERSION, 6): error("Qt6 is required.")
+
 unix:!macx {
-    isEmpty(PREFIX) {
-        PREFIX = /usr/local
-        isEmpty(XDGDIR): XDGDIR = $${PREFIX}/etc/xdg
-    }
+    # Installation prefix.
+    isEmpty(PREFIX): PREFIX = /usr
+
+    # XDG configuration directory.
+    isEmpty(XDGDIR): XDGDIR = $${PREFIX}/etc/xdg
+
+    # Library installation directory.
     isEmpty(LIBDIR): LIBDIR = $$PREFIX/lib$${LIBSUFFIX}
+
+    # Documentation installation directory.
     isEmpty(DOCDIR): DOCDIR = $$PREFIX/share/doc
+
+    # Manual page installation directory.
     isEmpty(MANDIR): MANDIR = $$PREFIX/share/man
-    isEmpty(XDGDIR): XDGDIR = /etc/xdg
 }
 
 QT += widgets
@@ -26,23 +36,35 @@ CONFIG += link_pkgconfig
 
 macx {
     QTFM_TARGET = QtFM
-    LIBS += -framework CoreFoundation -framework CoreServices
+
+    LIBS += -framework CoreFoundation
+    LIBS += -framework CoreServices
+
     QT_CONFIG -= no-pkg-config
+
     PKGCONFIG += libinotify
+
     QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+
     CONFIG += staticlib
 }
 
-CONFIG(deploy) : DEFINES += DEPLOY
+CONFIG(deploy) {
+    DEFINES += DEPLOY
+}
+
 CONFIG(release, debug|release) {
+    # Disable Qt debug output in release builds.
     DEFINES += QT_NO_DEBUG_OUTPUT
+
+    # Build the library statically unless shared libraries are requested.
     !CONFIG(sharedlib): CONFIG += staticlib
 }
 
-freebsd: LIBS += -linotify
-netbsd-g++: PKGCONFIG += libinotify
+freebsd {
+    LIBS += -linotify
+}
 
-#DEFINES += QT_DEPRECATED_WARNINGS
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
-lessThan(QT_MAJOR_VERSION, 5): error("Qt4 is not supported anymore.")
+netbsd-g++ {
+    PKGCONFIG += libinotify
+}

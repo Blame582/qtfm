@@ -19,6 +19,7 @@
 *
 ****************************************************************************/
 
+
 #include <QtGui>
 #include <QDockWidget>
 #include <QHeaderView>
@@ -29,6 +30,7 @@
 #include <QStatusBar>
 #include <QMenu>
 #include <QMenuBar>
+#include <QThreadPool>
 #ifndef NO_DBUS
 #include <QDBusConnection>
 #include <QDBusError>
@@ -725,7 +727,11 @@ void MainWindow::dirLoaded(bool thumbs)
     statusSize->setText(QString("%1 items").arg(items.count()));
     statusDate->setText(QString("%1").arg(total));
 
-    if (thumbsAct->isChecked() && thumbs) { QtConcurrent::run([this, items]() { modelList->loadThumbs(items); }); }
+    if (thumbsAct->isChecked() && thumbs) {
+        QThreadPool::globalInstance()->start([this, items]() {
+            modelList->loadThumbs(items);
+        });
+    }
     updateGrid();
 }
 
@@ -966,22 +972,25 @@ void MainWindow::clipboardChanged()
  * @brief Pastes from clipboard
  */
 void MainWindow::pasteClipboard() {
-  QString newPath;
-  QStringList cutList;
+    QString newPath;
+    QStringList cutList;
 
-  if (curIndex.isDir()) { newPath = curIndex.filePath(); }
-  else { newPath = pathEdit->itemText(0); }
+    if (curIndex.isDir()) { newPath = curIndex.filePath(); }
+    else { newPath = pathEdit->itemText(0); }
 
-  // Check list of files that are to be cut
-  QFile tempFile(QDir::tempPath() + "/" + APP + ".temp");
-  if (tempFile.exists()) {
-    tempFile.open(QIODevice::ReadOnly);
-    QDataStream out(&tempFile);
-    out >> cutList;
-    tempFile.close();
-  }
-  pasteLauncher(QApplication::clipboard()->mimeData(), newPath, cutList);
+    // Check list of files that are to be cut
+    QFile tempFile(QDir::tempPath() + "/" + APP + ".temp");
+    if (tempFile.exists()) {
+        if (tempFile.open(QIODevice::ReadOnly)) {
+            QDataStream out(&tempFile);
+            out >> cutList;
+            tempFile.close();
+        }
+    }
+
+    pasteLauncher(QApplication::clipboard()->mimeData(), newPath, cutList);
 }
+
 //---------------------------------------------------------------------------
 
 /**
@@ -1166,7 +1175,9 @@ void MainWindow::pasteLauncher(const QList<QUrl> &files, const QString &newPath,
   }
 
   listSelectionModel->clear();
-  QtConcurrent::run([this, files, newPath, cutList]() { pasteFiles(files, newPath, cutList); });
+  QThreadPool::globalInstance()->start([this, files, newPath, cutList]() {
+      pasteFiles(files, newPath, cutList);
+  });
 }
 //---------------------------------------------------------------------------
 
@@ -1943,54 +1954,95 @@ void MainWindow::actionMapper(QString cmd)
     QModelIndexList selList;
     QStringList temp;
 
+    // Get the current selection from the file view.
     if (focusWidget() == list || focusWidget() == detailTree) {
-        QFileInfo file = modelList->fileInfo(modelView->mapToSource(listSelectionModel->currentIndex()));
+        QFileInfo file = modelList->fileInfo(
+            modelView->mapToSource(listSelectionModel->currentIndex())
+            );
 
+        // %n is the name of the current file or directory.
         if (file.isDir()) {
-            cmd.replace("%n",file.fileName().replace(" ","\\"));
+            cmd.replace("%n", file.fileName().replace(" ", "\\"));
         } else {
-            cmd.replace("%n",file.baseName().replace(" ","\\"));
+            cmd.replace("%n", file.baseName().replace(" ", "\\"));
         }
 
-        if (listSelectionModel->selectedRows(0).count()) { selList = listSelectionModel->selectedRows(0); }
-        else { selList = listSelectionModel->selectedIndexes(); }
+        // Use selected rows when available, otherwise use selected indexes.
+        if (listSelectionModel->selectedRows(0).count()) {
+            selList = listSelectionModel->selectedRows(0);
+        } else {
+            selList = listSelectionModel->selectedIndexes();
+        }
     }
     else {
-        selList << modelView->mapFromSource(modelList->index(curIndex.filePath()));
+        // No file view has focus, so use the current tab/index.
+        selList << modelView->mapFromSource(
+            modelList->index(curIndex.filePath())
+            );
     }
 
-    cmd.replace("~",QDir::homePath());
+    // Expand ~ to the user's home directory.
+    cmd.replace("~", QDir::homePath());
 
-
-    //process any input tokens
+    // Process any input tokens.
     int pos = 0;
-    while(pos >= 0) {
-        pos = cmd.indexOf("%i",pos);
-        if(pos != -1) {
+    while (pos >= 0) {
+        pos = cmd.indexOf("%i", pos);
+
+        if (pos != -1) {
             pos += 2;
-            QString var = cmd.mid(pos,cmd.indexOf(" ",pos) - pos);
-            QString input = QInputDialog::getText(this,tr("Input"), var, QLineEdit::Normal);
-            if(input.isNull()) { return; } // cancelled
-            else { cmd.replace("%i" + var,input); }
+
+            QString var = cmd.mid(
+                pos,
+                cmd.indexOf(" ", pos) - pos
+                );
+
+            QString input = QInputDialog::getText(
+                this,
+                tr("Input"),
+                var,
+                QLineEdit::Normal
+                );
+
+            // Cancelled input aborts the action.
+            if (input.isNull()) {
+                return;
+            }
+
+            cmd.replace("%i" + var, input);
         }
     }
 
-
-    foreach(QModelIndex index,selList) {
-        temp.append(modelList->fileName(modelView->mapToSource(index)).replace(" ","\\"));
+    // Build the list of selected file names for %f.
+    for (const QModelIndex &index : selList) {
+        temp.append(
+            modelList->fileName(
+                         modelView->mapToSource(index)
+                         ).replace(" ", "\\")
+            );
     }
 
-    cmd.replace("%f",temp.join(" "));
+    cmd.replace("%f", temp.join(" "));
 
+    // Reuse the temporary list for full file paths.
     temp.clear();
 
-    foreach(QModelIndex index,selList) {
-        temp.append(modelList->filePath(modelView->mapToSource(index)).replace(" ","\\"));
+    // Build the list of selected file paths for %F.
+    for (const QModelIndex &index : selList) {
+        temp.append(
+            modelList->filePath(
+                         modelView->mapToSource(index)
+                         ).replace(" ", "\\")
+            );
     }
 
-    cmd.replace("%F",temp.join(" "));
+    cmd.replace("%F", temp.join(" "));
 
-    customActManager->execAction(cmd, pathEdit->itemText(0));
+    // Execute the completed custom action.
+    customActManager->execAction(
+        cmd,
+        pathEdit->itemText(0)
+        );
 }
 
 //---------------------------------------------------------------------------------
