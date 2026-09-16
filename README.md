@@ -1,4 +1,4 @@
-# QtFM 6.2
+# QtFM 6.3
 
 Lightweight desktop independent Qt file manager for Linux, FreeBSD, NetBSD, OpenBSD and macOS.
 
@@ -75,13 +75,13 @@ Download the latest [release](https://github.com/blame582/qtfm/releases), then m
 
 Download and extract:
 ```
-tar xvf qtfm-6.2.x.tar.gz
-cd qtfm-6.2.x
+tar xvf qtfm-6.3.x.tar.gz
+cd qtfm-6.3.x
 ```
 
 Or use git:
 ```
-git clone -b 6.2 https://github.com/blame582/qtfm
+git clone -b 6.3 https://github.com/blame582/qtfm
 cd qtfm
 ```
 

@@ -4,8 +4,8 @@ description: Lightweight UNIX File Manager
 logo: https://github.com/blame582/qtfm/raw/master/share/hicolor/256x256/apps/qtfm.png
 show_downloads: true
 github:
-  url: https://github.com/Blame582/qtfm/releases/download/qtfm-6.2.1-qt6/qtfm-6.2.1-qt6.tar.gz
-  zip_url: https://github.com/Blame582/qtfm/archive/refs/tags/qtfm-6.2.1-qt6.zip
-  tar_url: https://github.com/Blame582/qtfm/archive/refs/tags/qtfm-6.2.1-qt6.tar.gz
+  url: https://github.com/Blame582/qtfm/releases/download/6.3.0/qtfm-6.3.0.tar.gz
+  zip_url: https://github.com/Blame582/qtfm/archive/refs/tags/6.3.0.zip
+  tar_url: https://github.com/Blame582/qtfm/archive/refs/tags/6.3.0.tar.gz
 
 
