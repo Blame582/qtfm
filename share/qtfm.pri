@@ -55,7 +55,7 @@ CONFIG(deploy) {
 
 CONFIG(release, debug|release) {
     # Disable Qt debug output in release builds.
-    DEFINES += QT_NO_DEBUG_OUTPUT
+    #DEFINES += QT_NO_DEBUG_OUTPUT
 
     # Build the library statically unless shared libraries are requested.
     !CONFIG(sharedlib): CONFIG += staticlib

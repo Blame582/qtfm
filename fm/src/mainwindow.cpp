@@ -318,35 +318,40 @@ void MainWindow::lateStart() {
 
   // Connect mouse clicks in views
   if (settings->value("singleClick").toInt() == 1) {
-    connect(list, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(listItemClicked(QModelIndex)));
-    connect(detailTree, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(listItemClicked(QModelIndex)));
+      connect(list, &QAbstractItemView::clicked,
+              this, &MainWindow::listItemClicked);
+      connect(detailTree, &QAbstractItemView::clicked,
+              this, &MainWindow::listItemClicked);
   }
+
   if (settings->value("singleClick").toInt() == 2) {
-    connect(list, SIGNAL(clicked(QModelIndex))
-            ,this, SLOT(listDoubleClicked(QModelIndex)));
-    connect(detailTree, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(listDoubleClicked(QModelIndex)));
+      connect(list, &QAbstractItemView::clicked,
+              this, &MainWindow::listDoubleClicked);
+      connect(detailTree, &QAbstractItemView::clicked,
+              this, &MainWindow::listDoubleClicked);
   }
 
   // Connect list view
-  connect(list, SIGNAL(activated(QModelIndex)),
-          this, SLOT(listDoubleClicked(QModelIndex)));
+  connect(list, &QAbstractItemView::activated,
+          this, &MainWindow::listDoubleClicked);
 
   // Connect custom action manager
-  connect(customActManager, SIGNAL(actionMapped(QString)),
-          SLOT(actionMapper(QString)));
-  connect(customActManager, SIGNAL(actionsLoaded()), SLOT(readShortcuts()));
-  connect(customActManager, SIGNAL(actionFinished()), SLOT(clearCutItems()));
+  connect(customActManager, &CustomActionsManager::actionMapped,
+          this, &MainWindow::actionMapper);
+  connect(customActManager, &CustomActionsManager::actionsLoaded,
+          this, &MainWindow::readShortcuts);
+  connect(customActManager, &CustomActionsManager::actionFinished,
+          this, &MainWindow::clearCutItems);
 
   // Connect path edit
-  connect(pathEdit, SIGNAL(activated(QString)),
-          this, SLOT(pathEditChanged(QString)));
-  connect(customComplete, SIGNAL(activated(QString)),
-          this, SLOT(pathEditChanged(QString)));
-  connect(pathEdit->lineEdit(), SIGNAL(cursorPositionChanged(int,int)),
-          this, SLOT(addressChanged(int,int)));
+  connect(pathEdit, &QComboBox::textActivated,
+          this, &MainWindow::pathEditChanged);
+  connect(customComplete,
+        qOverload<const QString &>(&QCompleter::activated),
+        this,
+        &MainWindow::pathEditChanged);
+  connect(pathEdit->lineEdit(), &QLineEdit::cursorPositionChanged,
+          this, &MainWindow::addressChanged);
 
   // Connect bookmarks
   connect(bookmarksList, SIGNAL(activated(QModelIndex)),

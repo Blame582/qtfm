@@ -159,7 +159,9 @@ void MimeUtils::openInApp(QString exe, const QFileInfo &file,
     }
 
     qDebug() << "starting:" << name << arguments;
-    QProcess::startDetached(name, arguments);
+    bool started = QProcess::startDetached(name, arguments);
+    qDebug() << "startDetached result:" << started;
+  
   } else {
     QString terminalArgs;
     terminalArgs = "-e";
@@ -184,36 +186,55 @@ void MimeUtils::openInApp(QString exe, const QFileInfo &file,
   }
 }
 
-
-
-
 void MimeUtils::openFilesInApp(QString exe, const QStringList &files, QString termCmd)
 {
     // Separate application name from its arguments
-    QStringList split = exe.split(" ");
-    QString name = split.takeAt(0);
+    QStringList split = exe.split(" ", Qt::SkipEmptyParts);
+    if (split.isEmpty()) {
+        return;
+    }
+
+    QString name = split.takeFirst();
     QString args = split.join(" ");
 
-    if (args.toLower().contains("%f")) {
+    // Remove desktop-entry field codes
+    if (args.contains("%F", Qt::CaseInsensitive)) {
+        args.replace("%F", "", Qt::CaseInsensitive);
+    } else if (args.contains("%U", Qt::CaseInsensitive)) {
+        args.replace("%U", "", Qt::CaseInsensitive);
+    } else if (args.contains("%f", Qt::CaseInsensitive)) {
         args.replace("%f", "", Qt::CaseInsensitive);
-    } else if (args.toLower().contains("%u")) {
+    } else if (args.contains("%u", Qt::CaseInsensitive)) {
         args.replace("%u", "", Qt::CaseInsensitive);
     }
-    for (int i=0;i<files.size();++i) {
-        args.append("\"" + files.at(i) + "\" ");
+
+    // Add files as arguments
+    for (int i = 0; i < files.size(); ++i) {
+        args.append(args.isEmpty() ? "" : " ");
+        args.append("\"" + files.at(i) + "\"");
     }
 
-    // Start application
-    QString cmd = name;
-    if (termCmd.isEmpty()) {
-      cmd.append(" ");
-      cmd.append(args);
-    } else {
-      cmd = QString("%1 -e \"%2 %3\"").arg(termCmd).arg(name).arg(args);
+    QStringList arguments;
+    if (!args.isEmpty()) {
+        arguments = QProcess::splitCommand(args);
     }
-    qDebug() << "running:" << cmd;
-    QProcess::startDetached(cmd);
+
+    qDebug() << "running:" << name << arguments;
+
+    bool started = false;
+
+    if (termCmd.isEmpty()) {
+        started = QProcess::startDetached(name, arguments);
+    } else {
+        QStringList terminalArgs;
+        terminalArgs << "-e" << name;
+        terminalArgs.append(arguments);
+        started = QProcess::startDetached(termCmd, terminalArgs);
+    }
+
+    qDebug() << "startDetached result:" << started;
 }
+
 //---------------------------------------------------------------------------
 
 /**
