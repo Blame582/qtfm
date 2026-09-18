@@ -1,122 +1,115 @@
-# QtFM 6.3
+# QtFM Qt6
 
-Lightweight desktop independent Qt file manager for Linux, FreeBSD, NetBSD, OpenBSD and macOS.
+A Qt6 port of **QtFM 6.2.1**.
 
-  * XDG integration
-  * Customizable interface
-  * Powerful custom command system
-  * Customizable key bindings
-  * Drag & drop functionality
-  * Tabs support
-  * Removable storage support
-  * System tray daemon (``qtfm-tray(1)``)
-    * Show available storage/optical devices in system tray
-    * Auto mount (and open) storage/optical devices when added *(not default)*
-    * Auto play CD/DVD *(not default)*
-  * Extensive thumbnail support
-    * Supports image formats through ``ImageMagick``
-    * Supports PDF and related documents
-    * Supports video formats through ``FFmpeg``
-    * Supports embedded images in media files
+This repository contains an independent Qt6 fork of QtFM, updated from the 6.2.1 codebase to build and run with Qt6 while retaining QtFM's lightweight, traditional file-manager design.
 
-## Default shortcuts
+This is **not an official upstream QtFM release**.
 
-| Action                      | Shortcut    |
-|:---------------------------:|:-----------:|
-| New Window                  | [ctrl+n]    |
-| Open Tab                    | [ctrl+t]    |
-| Close Tab                   | [ctrl+w]    |
-| Copy Action                 | [ctrl+c]    |
-| Paste Action                | [ctrl+v]    |
-| Up Action                   | [alt+up]    |
-| Back Action                 | [backspace] |
-| Toggle Show Hidden Files    | [ctrl+h]    |
-| Move to Trash               | [del]       |
-| Delete                      | [shift+del] |
-| Open Terminal               | [F1]        |
-| Quit/Close                  | [ctrl+q]    |
-| Rename Action               | [F2]        |
-| Zoom Out                    | [ctrl+-]    |
-| Zoom In                     | [ctrl++]    |
-| Focus Path                  | [ctrl+l]    |
-| Toggle Icon View            | [F3]        |
-| Toggle Detail View          | [F4]        |
-| Refresh View                | [F5]        |
-| Drag and Drop Move Modifier | [shift]     |
-| Drag and Drop Copy Modifier | [ctrl]      |
-| Drag and Drop Ask Action    | [alt]       |
+## Features
 
-All shortcuts can be modified.
+QtFM provides a lightweight graphical file manager with:
 
-## Build
+* Qt-based graphical interface
+* Directory browsing
+* Tabs
+* File and directory operations
+* Drag and drop
+* Custom commands
+* Configurable key bindings
+* XDG integration
+* Removable-media support
+* Optional thumbnail support
 
-Download the latest [release](https://github.com/blame582/qtfm/releases), then make sure you have the required dependencies.
+The Qt6 port preserves the existing QtFM interface and functionality rather than replacing it with a new desktop-oriented design.
 
-* Requires [Qt](http://qt.io) 6.11.2
-  * Qt6 Widgets
-  * Qt6 Gui
-  * Qt6 Concurrent
-  * Qt6 DBus
-  * Qt6 Core
-* Requires [hicolor-icon-theme](https://www.freedesktop.org/wiki/Software/icon-theme/)
-* Requires [Breeze Icons](https://github.com/KDE/breeze-icons) or another freedesktop.org-compatible icon theme
-* Requires [libinotify](https://github.com/libinotify-kqueue/libinotify-kqueue) *if using BSD/macOS*
-* Recommended [udisks](https://www.freedesktop.org/wiki/Software/udisks/)/[bsdisks](https://www.freshports.org/sysutils/bsdisks/) at run-time
-* Recommended [ImageMagick](https://imagemagick.org/) 7.1.x for improved thumbnail support
-  * Magick++
-  * MagickWand
-  * MagickCore
-* Recommended [FFmpeg](https://ffmpeg.org/) 9.x for video/audio thumbnails/cover art
-  * libavdevice
-  * libswscale
-  * libavformat
-  * libavcodec
-  * libavutil
+## Qt6 Port
 
-Download and extract:
-```
-tar xvf qtfm-6.3.x.tar.gz
-cd qtfm-6.3.x
-```
+The original QtFM 6.2.1 source has been updated for Qt6.
 
-Or use git:
-```
-git clone -b 6.3 https://github.com/blame582/qtfm
-cd qtfm
-```
+The port includes:
 
-Build options:
+* Qt5 → Qt6 API updates
+* Qt6 build and dependency cleanup
+* Removal of obsolete Qt5 requirements
+* Qt6 compiler compatibility fixes
+* Updated source constructs required by modern Qt/C++
+* Fixes to command/action handling
+* Documentation and icon-theme updates
+* ImageMagick and FFmpeg compatibility updates
+* General source cleanup
 
- * ``CONFIG+=with_magick`` : This will enable ``ImageMagick`` support.
-   * ``MAGICK_PC=`` : Custom ``Magick++`` pkg-config .pc file.
-   * ``CONFIG+=oldmagick`` : If you have ``ImageMagick`` older than 6.9 *(Ubuntu)*.
- * ``CONFIG+=with_ffmpeg`` : This will enable FFmpeg support *(**NOTE!** requires ImageMagick)*.
- * ``CONFIG+=no_tray`` : This will disable ``qtfm-tray`` (``no_dbus`` will also disable this feature).
- * ``CONFIG+=no_dbus`` : This will disable D-Bus session and ``udisks`` features in (lib)QtFM, ``qtfm-tray`` will also not be built.
- * ``CONFIG+=with_includes`` : Install library includes and pkg-config
- * ``CONFIG+=sharedlib`` : Force shared library.
- * ``PREFIX=`` : Install prefix, where things are installed when running ``make install``
- * ``DOCDIR=`` : Location for documentation (default is ``PREFIX/share/doc``)
- * ``MANDIR=`` : Location for man pages (default is ``PREFIX/share/man``)
- * ``XDGDIR=`` : Location of XDG (default is ``/etc/xdg`` or ``PREFIX/etc/xdg``)
- * ``LIBDIR=`` : Library location (default is ``$PREFIX/lib$LIBSUFFIX``), only used if shared library is enabled
+The project is intended to remain **desktop-independent** and usable on lightweight Linux systems.
 
-Doing a normal build:
-```
-mkdir build && cd build
-qmake ..
+## Requirements
+
+* Qt6
+* A working X11 environment
+
+Optional:
+
+* ImageMagick — image/thumbnail functionality where supported
+* FFmpeg — multimedia thumbnail support where supported
+
+No Qt5 installation is required.
+
+## Building
+
+From the source directory:
+
+```sh
+qmake6
 make
 ```
 
-You can run the binary ``bin/qtfm`` or install to ``/usr/local``:
+Then install using the project's normal installation target:
+
+```sh
+make install
 ```
-sudo make install
-```
 
-## Packaging
+The exact installation prefix can be supplied through qmake when required.
 
-Same as above, but you should use ``PREFIX=`` and ``INSTALL_ROOT=``.
+## Status
 
-Example:
+This is an actively maintained Qt6 port based on QtFM 6.2.1.
 
-``
+The primary goal is to maintain a clean, usable Qt6 version of QtFM while avoiding unnecessary expansion of the original project's scope.
+
+Testing and bug reports are welcome.
+
+## Source
+
+This project is based on:
+
+**QtFM 6.2.1**
+
+The Qt6 work in this repository is maintained independently from the original upstream project.
+
+## Releases
+
+See the [Releases](../../releases) page for source archives and tagged versions.
+
+### Current release
+
+**QtFM 6.3.0**
+
+QtFM 6.3.0 is the first maintained release of this Qt6 fork.
+
+It contains the Qt6 port and associated compatibility, build, and cleanup work described above.
+
+## Bug Reports
+
+If you find a problem specific to the Qt6 version, please open an issue and include:
+
+* Qt version
+* operating system/distribution
+* compiler version
+* steps to reproduce the problem
+* relevant terminal output or error messages
+
+For problems that also occur in the original QtFM 6.2.1 codebase, please indicate that when reporting the issue.
+
+## License
+
+See the files included with the source distribution for the applicable license and copyright information.
