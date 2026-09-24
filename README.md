@@ -41,7 +41,7 @@ The port includes:
 
 The project is intended to remain **desktop-independent** and usable on lightweight Linux systems.
 
-<<<<<<< HEAD
+
 ## Requirements
 
 * Qt6
@@ -58,22 +58,18 @@ No Qt5 installation is required.
 
 From the source directory:
 
-```sh
-qmake6
-=======
-Doing a normal build:
-```
 mkdir build && cd build
+
 qmake6 ..
->>>>>>> d73ca53 (Fix file manager actions and application launching)
-make
-```
+
+make --prefix=/usr
+
 
 Then install using the project's normal installation target:
 
-```sh
-make install
-```
+
+sudo make install
+
 
 The exact installation prefix can be supplied through qmake when required.
 
