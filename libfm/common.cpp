@@ -420,6 +420,8 @@ void Common::setupIconTheme(QString appFilePath)
         if(temp.isNull()) {
             qDebug() << "checking for icon theme in static fallback";
             QStringList themes;
+            themes << QString("%1/../share/icons/Breeze").arg(appFilePath);
+            themes << "/usr/share/icons/Breeze" << "/usr/local/share/icons/Breeze";
             themes << QString("%1/../share/icons/Humanity").arg(appFilePath);
             themes << "/usr/share/icons/Humanity" << "/usr/local/share/icons/Humanity";
             themes << QString("%1/../share/icons/Adwaita").arg(appFilePath);
@@ -540,26 +542,46 @@ QString Common::getDeviceForDir(QString dir)
     return QString();
 }
 
+//QPalette Common::darkTheme()
+//{
+//   palette.setColor(QPalette::Window, QColor(64,66,68));
+//    palette.setColor(QPalette::WindowText, Qt::white);
+//    palette.setColor(QPalette::Base, QColor(46,47,48));
+//    palette.setColor(QPalette::AlternateBase, QColor(64,66,68));
+    //palette.setColor(QPalette::ToolTipBase, Qt::white);
+    //palette.setColor(QPalette::ToolTipText, Qt::white);
+//    palette.setColor(QPalette::Link, Qt::white);
+//    palette.setColor(QPalette::LinkVisited, Qt::white);
+//    palette.setColor(QPalette::ToolTipText, Qt::black);
+//    palette.setColor(QPalette::Text, Qt::white);
+//    palette.setColor(QPalette::Button, QColor(64,66,68));
+//    palette.setColor(QPalette::ButtonText, Qt::white);
+//    palette.setColor(QPalette::BrightText, Qt::red);
+//    palette.setColor(QPalette::Highlight, QColor(28,28,29));
+//    palette.setColor(QPalette::HighlightedText, Qt::white);
+//    palette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
+//    palette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
+//    return palette;
+//}
+
 QPalette Common::darkTheme()
 {
     QPalette palette;
-    palette.setColor(QPalette::Window, QColor(64,66,68));
-    palette.setColor(QPalette::WindowText, Qt::white);
-    palette.setColor(QPalette::Base, QColor(46,47,48));
-    palette.setColor(QPalette::AlternateBase, QColor(64,66,68));
-    //palette.setColor(QPalette::ToolTipBase, Qt::white);
-    //palette.setColor(QPalette::ToolTipText, Qt::white);
-    palette.setColor(QPalette::Link, Qt::white);
-    palette.setColor(QPalette::LinkVisited, Qt::white);
-    palette.setColor(QPalette::ToolTipText, Qt::black);
-    palette.setColor(QPalette::Text, Qt::white);
-    palette.setColor(QPalette::Button, QColor(64,66,68));
-    palette.setColor(QPalette::ButtonText, Qt::white);
-    palette.setColor(QPalette::BrightText, Qt::red);
-    palette.setColor(QPalette::Highlight, QColor(28,28,29));
-    palette.setColor(QPalette::HighlightedText, Qt::white);
-    palette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
-    palette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
+    palette.setColor(QPalette::Window, QColor(20,22,24));
+    palette.setColor(QPalette::WindowText, QColor(190,190,190));
+    palette.setColor(QPalette::Base, QColor(12,14,16));
+    palette.setColor(QPalette::AlternateBase, QColor(20,22,24));
+    palette.setColor(QPalette::Link, QColor(0,255,0));
+    palette.setColor(QPalette::LinkVisited, QColor(0,200,0));
+    palette.setColor(QPalette::ToolTipText, QColor(190,190,190));
+    palette.setColor(QPalette::Text, QColor(190,190,190));
+    palette.setColor(QPalette::Button, QColor(26,29,32));
+    palette.setColor(QPalette::ButtonText, QColor(190,190,190));
+    palette.setColor(QPalette::BrightText, QColor(0,255,0));
+    palette.setColor(QPalette::Highlight, QColor(8,80,8));
+    palette.setColor(QPalette::HighlightedText, QColor(0,255,0));
+    palette.setColor(QPalette::Disabled, QPalette::Text, QColor(80,80,80));
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(80,80,80));
     return palette;
 }
 
