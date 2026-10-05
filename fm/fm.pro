@@ -16,7 +16,8 @@ DEFINES += APP_VERSION=\"\\\"$${VERSION}\\\"\"
 HEADERS += \
     src/mainwindow.h \
     src/tabbar.h \
-    src/settingsdialog.h
+    src/settingsdialog.h \
+    src/themedialog.h
 
 SOURCES += \
     src/main.cpp \
@@ -25,7 +26,8 @@ SOURCES += \
     src/tabbar.cpp \
     src/settingsdialog.cpp \
     src/actiondefs.cpp \
-    src/actiontriggers.cpp
+    src/actiontriggers.cpp \
+    src/themedialog.cpp
 
 RESOURCES += $${top_srcdir}/share/$${TARGET}.qrc
 
@@ -54,6 +56,10 @@ unix:!macx {
     hicolor.files = $${top_srcdir}/share/hicolor
     hicolor.path = $${PREFIX}/share/icons
     INSTALLS += hicolor
+    
+    themes.files = $${top_srcdir}/share/themes
+    themes.path = $${PREFIX}/share/qtfm6
+    INSTALLS += themes
 
     CONFIG(no_dbus) {
         DEFINES += NO_DBUS

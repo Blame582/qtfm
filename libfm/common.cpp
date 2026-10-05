@@ -7,6 +7,7 @@
 
 #include "common.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QDebug>
@@ -16,7 +17,6 @@
 #include <QTextStream>
 #include <QMap>
 #include <QMapIterator>
-#include <QDirIterator>
 #include <QSettings>
 #include <QPalette>
 #include <QVector>
@@ -50,6 +50,48 @@ QString Common::configFile()
            .arg(configDir())
            .arg(APP)
            .arg(FM_MAJOR);
+}
+
+QString Common::themeFile()
+{
+    QSettings settings(configFile(), QSettings::IniFormat);
+
+    QString filename = settings.value("themefile",
+                                      "default.theme").toString();
+
+    return QString("%1/themes/%2")
+           .arg(configDir())
+           .arg(filename);
+}
+
+QString Common::systemThemeFile()
+{
+    QString theme = QString("%1/../share/%2%3/themes/default.theme")
+                    .arg(QCoreApplication::applicationDirPath())
+                    .arg(APP)
+                    .arg(FM_MAJOR);
+
+    if (QFile::exists(theme)) {
+        return theme;
+    }
+
+    theme = QString("/usr/share/%1%2/themes/default.theme")
+            .arg(APP)
+            .arg(FM_MAJOR);
+
+    if (QFile::exists(theme)) {
+        return theme;
+    }
+
+    theme = QString("/usr/local/share/%1%2/themes/default.theme")
+            .arg(APP)
+            .arg(FM_MAJOR);
+
+    if (QFile::exists(theme)) {
+        return theme;
+    }
+
+    return QString();
 }
 
 QString Common::trashDir()
@@ -149,40 +191,54 @@ QString Common::findIconInDir(QString appPath,
     iconSizes << "128" << "64" << "48" << "32" << "22" << "16";
 
     // theme
-    QDirIterator it(QString("%1/%2").arg(dir).arg(theme), QStringList() << "*.png" << "*.jpg" << "*.xpm", QDir::Files|QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDirIterator it(QString("%1/%2").arg(dir).arg(theme),
+                    QStringList() << "*.png" << "*.jpg" << "*.xpm",
+                    QDir::Files|QDir::NoDotAndDotDot,
+                    QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString found = it.next();
         if (found.split("/").takeLast().split(".").takeFirst()==icon) {
             for (int i=0;i<iconSizes.size();++i) {
-                QString hasFile = found.replace(QRegularExpression("/\\[\\.\\*\\]x\\[\\.\\*\\]/"),QString("/%1x%1/").arg(iconSizes.at(i)));
+                QString hasFile = found.replace(QRegularExpression("/\\[\\.\\*\\]x\\[\\.\\*\\]/"),
+                                                QString("/%1x%1/").arg(iconSizes.at(i)));
                 if (QFile::exists(hasFile)) { return hasFile; }
             }
             return found;
         }
     }
+
     // hicolor
     if (theme!="hicolor") {
-        QDirIterator hicolor(QString("%1/%2").arg(dir).arg("hicolor"), QStringList() << "*.png" << "*.jpg" << "*.xpm", QDir::Files|QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QDirIterator hicolor(QString("%1/%2").arg(dir).arg("hicolor"),
+                              QStringList() << "*.png" << "*.jpg" << "*.xpm",
+                              QDir::Files|QDir::NoDotAndDotDot,
+                              QDirIterator::Subdirectories);
         while (hicolor.hasNext()) {
             QString found = hicolor.next();
             if (found.split("/").takeLast().split(".").takeFirst()==icon) {
                 for (int i=0;i<iconSizes.size();++i) {
-                    QString hasFile = found.replace(QRegularExpression("/\\[\\.\\*\\]x\\[\\.\\*\\]/"),QString("/%1x%1/").arg(iconSizes.at(i)));
+                    QString hasFile = found.replace(QRegularExpression("/\\[\\.\\*\\]x\\[\\.\\*\\]/"),
+                                                    QString("/%1x%1/").arg(iconSizes.at(i)));
                     if (QFile::exists(hasFile)) { return hasFile; }
                 }
                 return found;
             }
         }
     }
+
     // pixmaps
     QStringList pixs = pixmapLocations(appPath);
     for (int i=0;i<pixs.size();++i) {
-        QDirIterator pixmaps(pixs.at(i), QStringList() << "*.png" << "*.jpg" << "*.xpm", QDir::Files|QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QDirIterator pixmaps(pixs.at(i),
+                             QStringList() << "*.png" << "*.jpg" << "*.xpm",
+                             QDir::Files|QDir::NoDotAndDotDot,
+                             QDirIterator::Subdirectories);
         while (pixmaps.hasNext()) {
             QString found = pixmaps.next();
             if (found.split("/").takeLast().split(".").takeFirst()==icon) { return found; }
         }
     }
+
     return result;
 }
 
@@ -192,6 +248,7 @@ QString Common::findIcon(QString appPath,
 {
     QString result;
     if (fileIcon.isEmpty()) { return result; }
+
     QStringList icons = iconLocations(appPath);
     for (int i=0;i<icons.size();++i) {
         QString icon = findIconInDir(appPath,
@@ -200,6 +257,7 @@ QString Common::findIcon(QString appPath,
                                      fileIcon);
         if (!icon.isEmpty()) { return icon; }
     }
+
     return result;
 }
 
@@ -208,9 +266,12 @@ QString Common::findApplication(QString appPath,
 {
     QString result;
     if (desktopFile.isEmpty()) { return result; }
+
     QStringList apps = applicationLocations(appPath);
     for (int i=0;i<apps.size();++i) {
-        QDirIterator it(apps.at(i), QStringList("*.desktop"), QDir::Files|QDir::NoDotAndDotDot);
+        QDirIterator it(apps.at(i),
+                        QStringList("*.desktop"),
+                        QDir::Files|QDir::NoDotAndDotDot);
         while (it.hasNext()) {
             QString found = it.next();
             if (found.split("/").takeLast()==desktopFile) {
@@ -219,6 +280,7 @@ QString Common::findApplication(QString appPath,
             }
         }
     }
+
     return result;
 }
 
@@ -226,8 +288,10 @@ QStringList Common::findApplications(QString filename)
 {
     QStringList result;
     if (filename.isEmpty()) { return result; }
+
     QString path = qgetenv("PATH");
     QStringList paths = path.split(":", Qt::SkipEmptyParts);
+
     for (int i=0;i<paths.size();++i) {
         QDirIterator it(paths.at(i),
                         QStringList("*"),
@@ -239,6 +303,7 @@ QStringList Common::findApplications(QString filename)
             }
         }
     }
+
     return result;
 }
 
@@ -249,8 +314,10 @@ QString Common::findApplicationIcon(QString appPath,
     QString result;
     QString desktop = findApplication(appPath, app);
     if (desktop.isEmpty()) { return result; }
+
     QString icon = getDesktopIcon(desktop);
     if (icon.isEmpty()) { return result; }
+
     result = findIcon(appPath, theme, icon);
     return result;
 }
@@ -259,20 +326,27 @@ QMap<QString, QString> Common::readGlobMimesFromFile(QString filename)
 {
     QMap<QString, QString> map;
     if (filename.isEmpty()) { return map; }
+
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly|QIODevice::Text)) { return map; }
+
     QTextStream s(&file);
     while (!s.atEnd()) {
         QStringList line = s.readLine().split(":");
         if (line.count() == 2) {
             QString suffix = line.at(1);
             if (!suffix.startsWith("*.")) { continue; }
+
             suffix.remove("*.");
             QString mime = line.at(0);
             mime.replace("/", "-");
-            if (!suffix.isEmpty() && !mime.isEmpty()) { map[mime] = suffix; }
+
+            if (!suffix.isEmpty() && !mime.isEmpty()) {
+                map[mime] = suffix;
+            }
         }
     }
+
     file.close();
     return map;
 }
@@ -281,6 +355,7 @@ QMap<QString, QString> Common::getMimesGlobs(QString appPath)
 {
     QMap<QString, QString> map;
     QStringList mimes = mimeGlobLocations(appPath);
+
     for (int i=0;i<mimes.size();++i) {
         QMapIterator<QString, QString> globs(readGlobMimesFromFile(mimes.at(i)));
         while (globs.hasNext()) {
@@ -288,6 +363,7 @@ QMap<QString, QString> Common::getMimesGlobs(QString appPath)
             map[globs.key()] = globs.value();
         }
     }
+
     return map;
 }
 
@@ -295,18 +371,25 @@ QMap<QString, QString> Common::readGenericMimesFromFile(QString filename)
 {
     QMap<QString, QString> map;
     if (filename.isEmpty()) { return map; }
+
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly|QIODevice::Text)) { return map; }
+
     QTextStream s(&file);
     while (!s.atEnd()) {
         QStringList line = s.readLine().split(":");
         if (line.count() == 2) {
             QString mimeName = line.at(0);
             mimeName.replace("/","-");
+
             QString mimeIcon = line.at(1);
-            if (!mimeName.isEmpty() && !mimeIcon.isEmpty()) { map[mimeName] = mimeIcon; }
+
+            if (!mimeName.isEmpty() && !mimeIcon.isEmpty()) {
+                map[mimeName] = mimeIcon;
+            }
         }
     }
+
     file.close();
     return map;
 }
@@ -315,6 +398,7 @@ QMap<QString, QString> Common::getMimesGeneric(QString appPath)
 {
     QMap<QString, QString> map;
     QStringList mimes = mimeGenericLocations(appPath);
+
     for (int i=0;i<mimes.size();++i) {
         QMapIterator<QString, QString> generic(readGenericMimesFromFile(mimes.at(i)));
         while (generic.hasNext()) {
@@ -322,6 +406,7 @@ QMap<QString, QString> Common::getMimesGeneric(QString appPath)
             map[generic.key()] = generic.value();
         }
     }
+
     return map;
 }
 
@@ -329,12 +414,17 @@ QStringList Common::getPixmaps(QString appPath)
 {
     QStringList result;
     QStringList pixs = pixmapLocations(appPath);
+
     for (int i=0;i<pixs.size();++i) {
         QDir pixmaps(pixs.at(i), "", QDir::Name, QDir::Files | QDir::NoDotAndDotDot);
+
         for (int i=0;i<pixmaps.entryList().size();++i) {
-            result << QString("%1/%2").arg(pixmaps.absolutePath()).arg(pixmaps.entryList().at(i));
+            result << QString("%1/%2")
+                    .arg(pixmaps.absolutePath())
+                    .arg(pixmaps.entryList().at(i));
         }
     }
+
     return result;
 }
 
@@ -342,16 +432,20 @@ QStringList Common::getMimeTypes(QString appPath)
 {
     QStringList result;
     QStringList mimes = mimeTypeLocations(appPath);
+
     for (int i=0;i<mimes.size();++i) {
         QFile file(mimes.at(i));
         if (!file.open(QIODevice::ReadOnly|QIODevice::Text)) { continue; }
+
         QTextStream s(&file);
         while (!s.atEnd()) {
             QString line = s.readLine();
             if (!line.isEmpty()) { result.append(line); }
         }
+
         file.close();
     }
+
     return result;
 }
 
@@ -359,81 +453,112 @@ QStringList Common::getIconThemes(QString appPath)
 {
     QStringList result;
     QStringList icons = iconLocations(appPath);
+
     for (int i=0;i<icons.size();++i) {
         QDirIterator it(icons.at(i), QDir::Dirs | QDir::NoDotAndDotDot);
+
         while (it.hasNext()) {
             it.next();
+
             //qDebug() << it.fileName() << it.filePath();
-            if (QFile::exists(it.filePath()+"/index.theme")) { result.append(it.fileName()); }
+
+            if (QFile::exists(it.filePath()+"/index.theme")) {
+                result.append(it.fileName());
+            }
         }
     }
+
     return result;
 }
 
 bool Common::removeFileCache()
 {
     QFile cache(QString("%1/file.cache").arg(Common::configDir()));
+
     if (cache.exists()) {
         return cache.remove();
     }
+
     return false;
 }
 
 bool Common::removeFolderCache()
 {
     QFile cache(QString("%1/folder.cache").arg(Common::configDir()));
+
     if (cache.exists()) {
         return cache.remove();
     }
+
     return false;
 }
 
 bool Common::removeThumbsCache()
 {
     QFile cache(QString("%1/thumbs.cache").arg(Common::configDir()));
+
     if (cache.exists()) {
         return cache.remove();
     }
+
     return false;
 }
 
 void Common::setupIconTheme(QString appFilePath)
 {
     QString temp = QIcon::themeName();
-    if (temp.isEmpty()  || temp == "hicolor") {
+
+    if (temp.isEmpty() || temp == "hicolor") {
         qDebug() << "checking for icon theme in settings" << Common::configFile();
+
         QSettings settings(Common::configFile(), QSettings::IniFormat);
         temp = settings.value("fallbackTheme").toString();
     }
+
     if(temp.isEmpty() || temp == "hicolor") {
-        if(QFile::exists(QDir::homePath() + "/" + ".gtkrc-2.0")) { // try gtk-2.0
+        if(QFile::exists(QDir::homePath() + "/" + ".gtkrc-2.0")) {
+            // try gtk-2.0
             qDebug() << "checking for icon theme in gtkrc-2.0";
-            QSettings gtkFile(QDir::homePath() + "/.gtkrc-2.0",QSettings::IniFormat/*,this*/);
+
+            QSettings gtkFile(QDir::homePath() + "/.gtkrc-2.0",
+                              QSettings::IniFormat);
             temp = gtkFile.value("gtk-icon-theme-name").toString().remove("\"");
         }
-        else { //try gtk-3.0
+        else {
+            // try gtk-3.0
             qDebug() << "checking for icon theme in gtk-3.0";
-            QSettings gtkFile(QDir::homePath() + "/.config/gtk-3.0/settings.ini",QSettings::IniFormat/*,this*/);
+
+            QSettings gtkFile(QDir::homePath() + "/.config/gtk-3.0/settings.ini",
+                              QSettings::IniFormat);
             temp = gtkFile.value("gtk-fallback-icon-theme").toString().remove("\"");
         }
-        //fallback
+
+        // fallback
         if(temp.isNull()) {
             qDebug() << "checking for icon theme in static fallback";
+
             QStringList themes;
             themes << QString("%1/../share/icons/Breeze").arg(appFilePath);
             themes << "/usr/share/icons/Breeze" << "/usr/local/share/icons/Breeze";
+
             themes << QString("%1/../share/icons/Humanity").arg(appFilePath);
             themes << "/usr/share/icons/Humanity" << "/usr/local/share/icons/Humanity";
+
             themes << QString("%1/../share/icons/Adwaita").arg(appFilePath);
             themes << "/usr/share/icons/Adwaita" << "/usr/local/share/icons/Adwaita";
+
             themes << QString("%1/../share/icons/Tango").arg(appFilePath);
             themes << "/usr/share/icons/Tango" << "/usr/local/share/icons/Tango";
+
             themes << QString("%1/../share/icons/gnome").arg(appFilePath);
             themes << "/usr/share/icons/gnome" << "/usr/local/share/icons/gnome";
+
             themes << QString("%1/../share/icons/oxygen").arg(appFilePath);
             themes << "/usr/share/icons/oxygen" << "/usr/local/share/icons/oxygen";
+
             themes << QString("%1/../share/icons/hicolor").arg(appFilePath);
             themes << "/usr/share/icons/hicolor" << "/usr/local/share/icons/hicolor";
+
             for (int i=0;i<themes.size();++i) {
                 if (QFile::exists(themes.at(i))) {
                     temp = QString(themes.at(i)).split("/").takeLast();
@@ -441,12 +566,15 @@ void Common::setupIconTheme(QString appFilePath)
                 }
             }
         }
+
         if (temp!="hicolor" && !temp.isEmpty()) {
             qDebug() << "save icon theme for later use";
+
             QSettings settings(Common::configFile(), QSettings::IniFormat);
             settings.setValue("fallbackTheme", temp);
         }
     }
+
     qDebug() << "setting icon theme" << temp;
     QIcon::setThemeName(temp);
 }
@@ -467,12 +595,14 @@ Common::DragMode Common::int2dad(int value)
     }
 }
 
-QVariant Common::readSetting(QString key, QString fallback) {
+QVariant Common::readSetting(QString key, QString fallback)
+{
     QSettings settings(Common::configFile(), QSettings::IniFormat);
     return settings.value(key, fallback);
 }
 
-void Common::writeSetting(QString key, QVariant value) {
+void Common::writeSetting(QString key, QVariant value)
+{
     QSettings settings(Common::configFile(), QSettings::IniFormat);
     settings.setValue(key, value);
 }
@@ -504,69 +634,64 @@ Common::DragMode Common::getDefaultDragAndDrop()
 QString Common::getDeviceForDir(QString dir)
 {
     QFile mtab("/etc/mtab");
-    if (!mtab.open(QIODevice::ReadOnly)) { return QString(); }
+
+    if (!mtab.open(QIODevice::ReadOnly)) {
+        return QString();
+    }
+
     QTextStream ts(&mtab);
     QString root;
     QVector<QStringList> result;
     QStringList entries = ts.readAll().split("\n", Qt::SkipEmptyParts);
+
     for (int i=0;i<entries.length();++i) {
         QString line = entries.at(i);
         QStringList info = line.split(" ", Qt::SkipEmptyParts);
+
         if (info.size()>=2) {
             QString dev = info.at(0);
             QString mnt = info.at(1);
+
             if (mnt == "/") {
                 root = dev;
                 continue;
             }
-            if (dir.startsWith(mnt)) { result.append(QStringList() << dev << mnt); }
+
+            if (dir.startsWith(mnt)) {
+                result.append(QStringList() << dev << mnt);
+            }
         }
     }
+
     mtab.close();
 
     if (result.size()==0) { return root; }
     if (result.size()==1) { return result.at(0).at(0); }
+
     if (result.size()>1) {
         int lastDevCount = 0;
         QString lastDevice;
+
         for (int i=0;i<result.size();++i) {
             QStringList device = result.at(i);
             QStringList devCount = device.at(1).split("/");
+
             if (devCount.size()>lastDevCount) {
                 lastDevCount = devCount.size();
                 lastDevice = device.at(0);
             }
         }
+
         return lastDevice;
     }
+
     return QString();
 }
-
-//QPalette Common::darkTheme()
-//{
-//   palette.setColor(QPalette::Window, QColor(64,66,68));
-//    palette.setColor(QPalette::WindowText, Qt::white);
-//    palette.setColor(QPalette::Base, QColor(46,47,48));
-//    palette.setColor(QPalette::AlternateBase, QColor(64,66,68));
-    //palette.setColor(QPalette::ToolTipBase, Qt::white);
-    //palette.setColor(QPalette::ToolTipText, Qt::white);
-//    palette.setColor(QPalette::Link, Qt::white);
-//    palette.setColor(QPalette::LinkVisited, Qt::white);
-//    palette.setColor(QPalette::ToolTipText, Qt::black);
-//    palette.setColor(QPalette::Text, Qt::white);
-//    palette.setColor(QPalette::Button, QColor(64,66,68));
-//    palette.setColor(QPalette::ButtonText, Qt::white);
-//    palette.setColor(QPalette::BrightText, Qt::red);
-//    palette.setColor(QPalette::Highlight, QColor(28,28,29));
-//    palette.setColor(QPalette::HighlightedText, Qt::white);
-//    palette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
-//    palette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
-//    return palette;
-//}
 
 QPalette Common::darkTheme()
 {
     QPalette palette;
+
     palette.setColor(QPalette::Window, QColor(20,22,24));
     palette.setColor(QPalette::WindowText, QColor(190,190,190));
     palette.setColor(QPalette::Base, QColor(12,14,16));
@@ -582,7 +707,142 @@ QPalette Common::darkTheme()
     palette.setColor(QPalette::HighlightedText, QColor(0,255,0));
     palette.setColor(QPalette::Disabled, QPalette::Text, QColor(80,80,80));
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(80,80,80));
+
     return palette;
+}
+
+QPalette Common::loadTheme(QString filename)
+{
+    QPalette palette = darkTheme();
+
+    if (filename.isEmpty() || !QFile::exists(filename)) {
+        return palette;
+    }
+
+    QSettings settings(filename, QSettings::IniFormat);
+
+    struct PaletteRole {
+        QPalette::ColorRole role;
+        const char *name;
+    };
+
+    const PaletteRole roles[] = {
+        { QPalette::Window, "Window" },
+        { QPalette::WindowText, "WindowText" },
+        { QPalette::Base, "Base" },
+        { QPalette::AlternateBase, "AlternateBase" },
+        { QPalette::ToolTipText, "ToolTipText" },
+        { QPalette::Text, "Text" },
+        { QPalette::Button, "Button" },
+        { QPalette::ButtonText, "ButtonText" },
+        { QPalette::BrightText, "BrightText" },
+        { QPalette::Link, "Link" },
+        { QPalette::LinkVisited, "LinkVisited" },
+        { QPalette::Highlight, "Highlight" },
+        { QPalette::HighlightedText, "HighlightedText" }
+    };
+
+    for (const PaletteRole &item : roles) {
+        QString value = settings.value(QString("Palette/%1").arg(item.name)).toString();
+
+        if (!value.isEmpty()) {
+            QColor color(value);
+
+            if (color.isValid()) {
+                palette.setColor(item.role, color);
+            }
+        }
+    }
+
+    QString disabledText =
+        settings.value("Palette/DisabledText").toString();
+
+    if (!disabledText.isEmpty()) {
+        QColor color(disabledText);
+
+        if (color.isValid()) {
+            palette.setColor(QPalette::Disabled,
+                             QPalette::Text,
+                             color);
+        }
+    }
+
+    QString disabledButtonText =
+        settings.value("Palette/DisabledButtonText").toString();
+
+    if (!disabledButtonText.isEmpty()) {
+        QColor color(disabledButtonText);
+
+        if (color.isValid()) {
+            palette.setColor(QPalette::Disabled,
+                             QPalette::ButtonText,
+                             color);
+        }
+    }
+
+    return palette;
+}
+
+bool Common::saveTheme(QString filename, const QPalette &palette)
+{
+    if (filename.isEmpty()) {
+        return false;
+    }
+
+    QSettings settings(filename, QSettings::IniFormat);
+
+    settings.clear();
+
+    settings.setValue("Palette/Window",
+                      palette.color(QPalette::Window).name(QColor::HexRgb));
+
+    settings.setValue("Palette/WindowText",
+                      palette.color(QPalette::WindowText).name(QColor::HexRgb));
+
+    settings.setValue("Palette/Base",
+                      palette.color(QPalette::Base).name(QColor::HexRgb));
+
+    settings.setValue("Palette/AlternateBase",
+                      palette.color(QPalette::AlternateBase).name(QColor::HexRgb));
+
+    settings.setValue("Palette/ToolTipText",
+                      palette.color(QPalette::ToolTipText).name(QColor::HexRgb));
+
+    settings.setValue("Palette/Text",
+                      palette.color(QPalette::Text).name(QColor::HexRgb));
+
+    settings.setValue("Palette/Button",
+                      palette.color(QPalette::Button).name(QColor::HexRgb));
+
+    settings.setValue("Palette/ButtonText",
+                      palette.color(QPalette::ButtonText).name(QColor::HexRgb));
+
+    settings.setValue("Palette/BrightText",
+                      palette.color(QPalette::BrightText).name(QColor::HexRgb));
+
+    settings.setValue("Palette/Link",
+                      palette.color(QPalette::Link).name(QColor::HexRgb));
+
+    settings.setValue("Palette/LinkVisited",
+                      palette.color(QPalette::LinkVisited).name(QColor::HexRgb));
+
+    settings.setValue("Palette/Highlight",
+                      palette.color(QPalette::Highlight).name(QColor::HexRgb));
+
+    settings.setValue("Palette/HighlightedText",
+                      palette.color(QPalette::HighlightedText).name(QColor::HexRgb));
+
+    settings.setValue("Palette/DisabledText",
+                      palette.color(QPalette::Disabled,
+                                    QPalette::Text).name(QColor::HexRgb));
+
+    settings.setValue("Palette/DisabledButtonText",
+                      palette.color(QPalette::Disabled,
+                                    QPalette::ButtonText).name(QColor::HexRgb));
+
+    settings.sync();
+
+    return settings.status() == QSettings::NoError;
 }
 
 QStringList Common::iconPaths(QString appPath)
@@ -590,42 +850,106 @@ QStringList Common::iconPaths(QString appPath)
     QStringList iconsPath = QIcon::themeSearchPaths();
     QString iconsHomeLocal = QString("%1/.local/share/icons").arg(QDir::homePath());
     QString iconsHome = QString("%1/.icons").arg(QDir::homePath());
-    if (QFile::exists(iconsHomeLocal) && !iconsPath.contains(iconsHomeLocal)) { iconsPath.prepend(iconsHomeLocal); }
-    if (QFile::exists(iconsHome) && !iconsPath.contains(iconsHome)) { iconsPath.prepend(iconsHome); }
+
+    if (QFile::exists(iconsHomeLocal) && !iconsPath.contains(iconsHomeLocal)) {
+        iconsPath.prepend(iconsHomeLocal);
+    }
+
+    if (QFile::exists(iconsHome) && !iconsPath.contains(iconsHome)) {
+        iconsPath.prepend(iconsHome);
+    }
+
     iconsPath << QString("%1/../share/icons").arg(appPath);
-    return  iconsPath;
+
+    return iconsPath;
 }
 
 QVector<QStringList> Common::getDefaultActions()
 {
     QVector<QStringList> result;
-    result.append(QStringList()<< "tar.gz,tar.bz2,tar.xz,tar,tgz,tbz,tbz2,txz" << "Extract tar here ..." << "package-x-generic" << "tar xvf %f");
-    result.append(QStringList()<< "7z" << "Extract 7z here ..." << "package-x-generic" << "7za x %f");
-    result.append(QStringList()<< "rar" << "Extract rar here ..." << "package-x-generic" << "unrar x %f");
-    result.append(QStringList()<< "zip" << "Extract zip here ..." << "package-x-generic" << "unzip %f");
-    result.append(QStringList()<< "gz" << "Extract gz here ..." << "package-x-generic" << "gunzip --keep %f");
-    result.append(QStringList()<< "bz2" << "Extract bz2 here ..." << "package-x-generic" << "bunzip2 --keep %f");
-    result.append(QStringList()<< "xz" << "Extract xz here ..." << "package-x-generic" << "xz -d --keep %f");
-    result.append(QStringList()<< "*" << "Compress to tar.gz" << "package-x-generic" << "tar cvvzf %n.tar.gz %f");
-    result.append(QStringList()<< "*" << "Compress to tar.bz2" << "package-x-generic" << "tar cvvjf %n.tar.bz2 %f");
-    result.append(QStringList()<< "*" << "Compress to tar.xz" << "package-x-generic" << "tar cvvJf %n.tar.xz %f");
-    result.append(QStringList()<< "*" << "Compress to zip" << "package-x-generic" << "zip -r %n.zip %f");
+
+    result.append(QStringList() << "tar.gz,tar.bz2,tar.xz,tar,tgz,tbz,tbz2,txz"
+                                << "Extract tar here ..."
+                                << "package-x-generic"
+                                << "tar xvf %f");
+
+    result.append(QStringList() << "7z"
+                                << "Extract 7z here ..."
+                                << "package-x-generic"
+                                << "7za x %f");
+
+    result.append(QStringList() << "rar"
+                                << "Extract rar here ..."
+                                << "package-x-generic"
+                                << "unrar x %f");
+
+    result.append(QStringList() << "zip"
+                                << "Extract zip here ..."
+                                << "package-x-generic"
+                                << "unzip %f");
+
+    result.append(QStringList() << "gz"
+                                << "Extract gz here ..."
+                                << "package-x-generic"
+                                << "gunzip --keep %f");
+
+    result.append(QStringList() << "bz2"
+                                << "Extract bz2 here ..."
+                                << "package-x-generic"
+                                << "bunzip2 --keep %f");
+
+    result.append(QStringList() << "xz"
+                                << "Extract xz here ..."
+                                << "package-x-generic"
+                                << "xz -d --keep %f");
+
+    result.append(QStringList() << "*"
+                                << "Compress to tar.gz"
+                                << "package-x-generic"
+                                << "tar cvvzf %n.tar.gz %f");
+
+    result.append(QStringList() << "*"
+                                << "Compress to tar.bz2"
+                                << "package-x-generic"
+                                << "tar cvvjf %n.tar.bz2 %f");
+
+    result.append(QStringList() << "*"
+                                << "Compress to tar.xz"
+                                << "package-x-generic"
+                                << "tar cvvJf %n.tar.xz %f");
+
+    result.append(QStringList() << "*"
+                                << "Compress to zip"
+                                << "package-x-generic"
+                                << "zip -r %n.zip %f");
+
     return result;
 }
 
 QString Common::formatSize(qint64 num)
 {
     QString total;
+
     const qint64 kb = 1024;
     const qint64 mb = 1024 * kb;
     const qint64 gb = 1024 * mb;
     const qint64 tb = 1024 * gb;
 
-    if (num >= tb) { total = QString("%1TB").arg(QString::number(qreal(num) / tb, 'f', 2)); }
-    else if (num >= gb) { total = QString("%1GB").arg(QString::number(qreal(num) / gb, 'f', 2)); }
-    else if (num >= mb) { total = QString("%1MB").arg(QString::number(qreal(num) / mb, 'f', 1)); }
-    else if (num >= kb) { total = QString("%1KB").arg(QString::number(qreal(num) / kb,'f', 1)); }
-    else { total = QString("%1 bytes").arg(num); }
+    if (num >= tb) {
+        total = QString("%1TB").arg(QString::number(qreal(num) / tb, 'f', 2));
+    }
+    else if (num >= gb) {
+        total = QString("%1GB").arg(QString::number(qreal(num) / gb, 'f', 2));
+    }
+    else if (num >= mb) {
+        total = QString("%1MB").arg(QString::number(qreal(num) / mb, 'f', 1));
+    }
+    else if (num >= kb) {
+        total = QString("%1KB").arg(QString::number(qreal(num) / kb,'f', 1));
+    }
+    else {
+        total = QString("%1 bytes").arg(num);
+    }
 
     return total;
 }
@@ -639,9 +963,11 @@ QString Common::getDriveInfo(QString path)
     struct statfs info;
     statfs(path.toLocal8Bit(), &info);
 #endif
+
     if(info.f_blocks == 0) return "";
 
-    return QString("%1  /  %2  (%3%)").arg(formatSize((qint64) (info.f_blocks - info.f_bavail)*info.f_bsize))
+    return QString("%1  /  %2  (%3%)")
+            .arg(formatSize((qint64) (info.f_blocks - info.f_bavail)*info.f_bsize))
             .arg(formatSize((qint64) info.f_blocks*info.f_bsize))
             .arg((info.f_blocks - info.f_bavail)*100/info.f_blocks);
 }

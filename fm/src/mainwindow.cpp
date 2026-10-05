@@ -44,7 +44,7 @@
 #include "progressdlg.h"
 #include "fileutils.h"
 #include "applicationdialog.h"
-
+#include "themedialog.h"
 #include "common.h"
 
 #ifdef Q_OS_MAC
@@ -101,27 +101,47 @@ MainWindow::MainWindow()
     }
 
     settings = new QSettings(Common::configFile(), QSettings::IniFormat);
+    if (!settings->contains("themefile")) {
+        settings->setValue("themefile", "default.theme");
+    }
+    
     if (settings->value("clearCache").toBool()) {
         qDebug() << "clear cache";
         Common::removeFileCache();
         Common::removeFolderCache();
         Common::removeThumbsCache();
+        
         settings->setValue("clearCache", false);
     }
 
-    // Dark theme
-#ifdef DEPLOY
-    if (settings->value("darkTheme", true).toBool()) {
-#else
-    if (settings->value("darkTheme").toBool()) {
-#endif
-        qApp->setPalette(Common::darkTheme());
+
+
+    // Theme
+    QString themeDir = Common::configDir() + "/themes";
+    QDir().mkpath(themeDir);
+
+    QString defaultTheme = themeDir + "/default.theme";
+
+    if (!QFile::exists(defaultTheme)) {
+        QString systemTheme = Common::systemThemeFile();
+
+        if (!systemTheme.isEmpty()) {
+            QFile::copy(systemTheme, defaultTheme);
+        }
     }
+
+    QString theme = Common::themeFile();
+
+    if (!QFile::exists(theme)) {
+        theme = defaultTheme;
+    }
+
+    qApp->setPalette(Common::loadTheme(theme));
 
     // set icon theme
 #ifdef Q_OS_MAC
 #ifdef DEPLOY
-    QIcon::setThemeName("Adwaita");
+    QIcon::setThemeName("Breeze");
     qApp->setStyle(QStyleFactory::create("fusion"));
 #else
     Common::setupIconTheme(qApp->applicationFilePath());
@@ -263,6 +283,12 @@ MainWindow::MainWindow()
     QTimer::singleShot(0, this, SLOT(lateStart()));
 }
 //---------------------------------------------------------------------------
+
+void MainWindow::showThemeDialog()
+{
+    ThemeDialog dialog(this);
+    dialog.exec();
+}
 
 /**
  * @brief Initialization

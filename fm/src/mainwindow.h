@@ -44,6 +44,7 @@
 #include "propertiesdlg.h"
 #include "icondlg.h"
 #include "tabbar.h"
+#include "themedialog.h"
 #include "fileutils.h"
 #include "mimeutils.h"
 #include "customactionsmanager.h"
@@ -120,6 +121,7 @@ public slots:
     void editBookmark();
     void toggleWrapBookmarks();
     void showEditDialog();
+    void showThemeDialog();
     bool copyFolder(const QString &srcFolder, const QString &dstFolder, qint64, bool);
     void renameFile();
     void actionMapper(QString);
@@ -279,6 +281,7 @@ private:
     QAction *copyAct;
     QAction *pasteAct;
     QAction *settingsAct;
+    QAction *themeAct;
     QAction *renameAct;
     QAction *terminalAct;
     QAction *openAct;

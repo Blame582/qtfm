@@ -183,9 +183,7 @@ QWidget *SettingsDialog::createAppearanceSettings()
 #ifndef Q_OS_MAC
     cmbIconTheme = new QComboBox(grpAppear);
 #endif
-#if QT_VERSION >= 0x050000
-    checkDarkTheme = new QCheckBox(grpAppear);
-#endif
+
     checkWindowTitlePath = new QCheckBox(grpAppear);
     checkFileColor = new QCheckBox(grpAppear);
     showHomeButton = new QCheckBox(grpAppear);
@@ -195,9 +193,7 @@ QWidget *SettingsDialog::createAppearanceSettings()
 #ifndef Q_OS_MAC
     layoutAppear->addRow(tr("Fallback Icon theme:"), cmbIconTheme);
 #endif
-#if QT_VERSION >= 0x050000
-    layoutAppear->addRow(tr("Use \"Dark Mode\""), checkDarkTheme);
-#endif
+
     layoutAppear->addRow(tr("Colors on file names"), checkFileColor);
     layoutAppear->addRow(tr("Show path in window title"), checkWindowTitlePath);
     layoutAppear->addRow(tr("Show Home button"), showHomeButton);
@@ -692,13 +688,6 @@ void SettingsDialog::readSettings() {
   showHomeButton->setChecked(settingsPtr->value("home_button", true).toBool());
   showNewTabButton->setChecked(settingsPtr->value("newtab_button", false).toBool());
   showTerminalButton->setChecked(settingsPtr->value("terminal_button", true).toBool());
-#if QT_VERSION >= 0x050000
-#ifdef DEPLOY
-  checkDarkTheme->setChecked(settingsPtr->value("darkTheme", true).toBool());
-#else
-  checkDarkTheme->setChecked(settingsPtr->value("darkTheme", false).toBool());
-#endif
-#endif
   checkFileColor->setChecked(settingsPtr->value("fileColor", false).toBool());
   checkPathHistory->setChecked(settingsPtr->value("pathHistory", true).toBool());
   checkWindowTitlePath->setChecked(settingsPtr->value("windowTitlePath", true).toBool());
@@ -938,12 +927,7 @@ bool SettingsDialog::saveSettings() {
   }
 #endif
 
-#if QT_VERSION >= 0x050000
-  if (checkDarkTheme->isChecked() != settingsPtr->value("darkTheme").toBool()) {
-      QMessageBox::warning(this, tr("Restart to apply settings"), tr("You must restart application to apply theme settings"));
-  }
-  settingsPtr->setValue("darkTheme", checkDarkTheme->isChecked());
-#endif
+
   settingsPtr->setValue("fileColor", checkFileColor->isChecked());
   settingsPtr->setValue("pathHistory", checkPathHistory->isChecked());
 
@@ -1118,4 +1102,3 @@ void SettingsDialog::clearCustomAction()
     }
     readShortcuts();
 }
-//---------------------------------------------------------------------------

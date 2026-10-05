@@ -260,6 +260,12 @@ void MainWindow::createActions() {
   connect(settingsAct, SIGNAL(triggered()), this, SLOT(showEditDialog()));
   settingsAct->setIcon(actionIcons->at(15));
   actionList->append(settingsAct);
+  
+  themeAct = new QAction(tr("Theme Selector"), this);
+  themeAct->setStatusTip(tr("Customize QtFM theme"));
+  themeAct->setIcon(QIcon::fromTheme("preferences-desktop-theme"));
+  connect(themeAct, SIGNAL(triggered()), this, SLOT(showThemeDialog()));
+  actionList->append(themeAct);
 
   renameAct = new QAction(tr("Rename"), this);
   renameAct->setStatusTip(tr("Rename file"));
@@ -523,6 +529,7 @@ void MainWindow::createMenus() {
   editMenu->addAction(clearCacheAct);
   editMenu->addSeparator();
   editMenu->addAction(settingsAct);
+  editMenu->addAction(themeAct);
 
   // View menu
   // ----------------------------------------------------------------------
