@@ -25,8 +25,6 @@ The Qt6 port preserves the existing QtFM interface and functionality rather than
 
 ## Qt6 Port
 
-The original QtFM 6.2.1 source has been updated for Qt6.
-
 The port includes:
 
 * Qt5 → Qt6 API updates
@@ -55,11 +53,6 @@ No Qt5 installation is required.
 
 ## Building
 
-From the source directory:
-
-```sh
-qmake6
-```
 Doing a normal build:
 
 ```sh
@@ -71,7 +64,7 @@ make
 Then install using the project's normal installation target:
 
 ```sh
-make install
+sudo make install
 ```
 
 The exact installation prefix can be supplied through qmake when required.
@@ -83,18 +76,6 @@ This is an actively maintained Qt6 port based on QtFM 6.2.1.
 The primary goal is to maintain a clean, usable Qt6 version of QtFM while avoiding unnecessary expansion of the original project's scope.
 
 Testing and bug reports are welcome.
-
-## Source
-
-This project is based on:
-
-**QtFM 6.2.1**
-
-The Qt6 work in this repository is maintained independently from the original upstream project.
-
-## Releases
-
-See the [Releases](../../releases) page for source archives and tagged versions.
 
 ### Current release
 
