@@ -27,7 +27,7 @@ The Qt6 port preserves the existing QtFM interface and functionality rather than
 
 The port includes:
 
-* Qt5 → Qt6 API updates
+* Qt5 to Qt6 API updates
 * Qt6 build and dependency cleanup
 * Removal of obsolete Qt5 requirements
 * Qt6 compiler compatibility fixes
