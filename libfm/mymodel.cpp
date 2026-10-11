@@ -26,6 +26,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include "fileutils.h"
+#include <QSettings>
 
 #ifdef WITH_MAGICK
 #include <Magick++.h>
@@ -1073,6 +1074,37 @@ QByteArray myModel::getVideoFrame(QString file, bool getEmbedded, int videoFrame
 #endif
 //---------------------------------------------------------------------------
 
+void myModel::setTheme(const QString &filename)
+{
+    colors = Common::loadTheme(filename);
+
+    QSettings settings(filename, QSettings::IniFormat);
+  	colorFileNames = settings.value("Appearance/ColorFileNames",
+                                    Common::readSetting("fileColor", "false")).toBool();
+
+    hiddenColor = QColor(settings.value("FileColors/Hidden",
+                                        colors.dark().color()).toString());
+    symlinkColor = QColor(settings.value("FileColors/SymbolicLink",
+                                         colors.link().color()).toString());
+    executableColor = QColor(settings.value("FileColors/Executable",
+                                            QColor(Qt::darkGreen)).toString());
+    cutColor = QColor(settings.value("FileColors/Cut",
+                                     colors.windowText().color()).toString());
+
+    if (!hiddenColor.isValid())
+        hiddenColor = colors.dark().color();
+    if (!symlinkColor.isValid())
+        symlinkColor = colors.link().color();
+    if (!executableColor.isValid())
+        executableColor = QColor(Qt::darkGreen);
+    if (!cutColor.isValid())
+        cutColor = colors.windowText().color();
+
+    beginResetModel();
+    endResetModel();
+}
+
+
 /**
  * @brief Returns model data (information about directories and files)
  * @param index
@@ -1083,22 +1115,27 @@ QVariant myModel::data(const QModelIndex & index, int role) const {
   // Retrieve model item
   myModelItem *item = static_cast<myModelItem*>(index.internalPointer());
 
-  // Color of filename (depends on file type)
+  // Color of filename (configured by the active theme)
   if (role == Qt::ForegroundRole) {
-    if (!Common::readSetting("fileColor").toBool()) { return colors.windowText(); }
+    if (!colorFileNames)
+      return colors.windowText();
+
     QFileInfo type(item->fileInfo());
-    if (cutItems.contains(type.filePath())) {
+
+    if (cutItems.contains(type.filePath()))
+      return cutColor;
+    else if (type.isHidden())
+      return hiddenColor;
+    else if (type.isSymLink())
+      return symlinkColor;
+    else if (type.isDir())
       return colors.windowText();
-    } else if (type.isHidden()) {
-      return colors.dark();
-    } else if (type.isSymLink()) {
-      return colors.link();
-    } else if (type.isDir()) {
-      return colors.windowText();
-    } else if (type.isExecutable()) {
-      return QBrush(QColor(Qt::darkGreen));
-    }
+    else if (type.isExecutable())
+      return executableColor;
+
+    return colors.windowText();
   }
+  
   // Alignment of filename
   else if (role == Qt::TextAlignmentRole) {
     if (index.column() == 1) {

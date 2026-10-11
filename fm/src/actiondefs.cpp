@@ -177,6 +177,19 @@ void MainWindow::createActions() {
   iconAct->setIcon(actionIcons->at(9));
   actionList->append(iconAct);
 
+  onePaneAction = new QAction(tr("1 Pane"),this);
+  onePaneAction->setStatusTip(tr("Show one folder pane"));
+  onePaneAction->setCheckable(true);
+  onePaneAction->setChecked(true);
+  connect(onePaneAction, SIGNAL(triggered()), this, SLOT(setOnePane()));
+  actionList->append(onePaneAction);
+
+  twoPaneAction = new QAction(tr("2 Panes"),this);
+  twoPaneAction->setStatusTip(tr("Show two folder panes"));
+  twoPaneAction->setCheckable(true);
+  connect(twoPaneAction, SIGNAL(triggered()), this, SLOT(setTwoPanes()));
+  actionList->append(twoPaneAction);
+
   sortNameAct = new QAction(tr("Name"), this);
   sortNameAct->setStatusTip(tr("Sort icons by name"));
   sortNameAct->setCheckable(true);
@@ -434,6 +447,8 @@ void MainWindow::readShortcuts() {
     shortcuts.insert(focusAddressAct->text(), "ctrl+l");
     shortcuts.insert(iconAct->text(), "f3");
     shortcuts.insert(detailAct->text(), "f4");
+    shortcuts.insert(onePaneAction->text(), "f6");
+    shortcuts.insert(twoPaneAction->text(), "f7");
 
     settings->beginGroup("customShortcuts");
     QHashIterator<QString, QString> i(shortcuts);
@@ -552,6 +567,12 @@ void MainWindow::createMenus() {
   viewMenu->addSeparator();
   viewMenu->addAction(iconAct);
   viewMenu->addAction(detailAct);
+  
+  QMenu *folderPaneMenu = new QMenu(tr("Folder Panes"));
+  folderPaneMenu->addAction(onePaneAction);
+  folderPaneMenu->addAction(twoPaneAction);
+  viewMenu->addMenu(folderPaneMenu);
+  
   viewMenu->addAction(hiddenAct);
   viewMenu->addSeparator();
   viewMenu->addAction(tabsOnTopAct);

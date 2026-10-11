@@ -1,5 +1,4 @@
 /*
- * This file is part of QtFM <https://qtfm.eu>
  *
  * Copyright (C) 2013-2019 QtFM developers (see AUTHORS)
  * Copyright (C) 2010-2012 Wittfella <wittfella@qtfm.org>
@@ -90,7 +89,8 @@ void MainWindow::bookmarkPressed(QModelIndex current)
     }
 #endif
     if (QApplication::mouseButtons() == Qt::MiddleButton) {
-        tabs->setCurrentIndex(addTab(current.data(BOOKMARK_PATH).toString()));
+        tabBar *paneTabs = activePane == 2 ? tabs2 : tabs;
+		paneTabs->setCurrentIndex(addTab(current.data(BOOKMARK_PATH).toString()));
     }
 }
 

@@ -1,5 +1,4 @@
 /*
- * This file is part of QtFM <https://qtfm.eu>
  *
  * Copyright (C) 2013-2019 QtFM developers (see AUTHORS)
  * Copyright (C) 2010-2012 Wittfella <wittfella@qtfm.org>

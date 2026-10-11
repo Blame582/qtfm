@@ -892,54 +892,63 @@ void MainWindow::toggleLockLayout() {
 /**
  * @brief Toggles icon view (thumbs and sizes)
  */
-void MainWindow::toggleIcons() {
+void MainWindow::toggleIcons()
+{
+	QListView *paneList = activePane == 2 ? list2 : list;
+    QTreeView *paneTree = activePane == 2 ? detailTree2 : detailTree;
+    QStackedWidget *paneStack = activePane == 2 ? stackWidget2 : stackWidget;
+    tabBar *paneTabs = activePane == 2 ? tabs2 : tabs;
+    QString panePath = activePane == 2 ? panePath2 : panePath1;
 
-  // Set root index
-  if (list->rootIndex() != modelList->index(pathEdit->currentText())) {
-    QModelIndex i = modelList->index(pathEdit->currentText());
-    list->setRootIndex(modelView->mapFromSource(i));
-  }
+    QModelIndex root = modelView->mapFromSource(modelList->index(panePath));
+    if (paneList->rootIndex() != root) {
+        paneList->setRootIndex(root);
+    }
 
-  if (iconAct->isChecked()) {
-    currentView = 1;
-    list->setViewMode(QListView::IconMode);
-    list->setItemDelegate(ivdelegate);
-    /*int padding = 10;
-    if (zoom<48) { padding = 20; }
-    if (zoom<32) { padding = 40; }
-    if (zoom<24) { padding = 50; }
-    list->setGridSize(QSize(zoom*2+padding, zoom*2+padding));*/
-    list->setGridSize(QSize(zoom, zoom));
-    list->setIconSize(QSize(zoom, zoom));
-    list->setFlow(QListView::LeftToRight);
+    if (iconAct->isChecked()) {
+        currentView = 1;
+        paneList->setViewMode(QListView::IconMode);
+        paneList->setItemDelegate(ivdelegate);
+        paneList->setGridSize(QSize(zoom, zoom));
+        paneList->setIconSize(QSize(zoom, zoom));
+        paneList->setFlow(QListView::LeftToRight);
+        modelList->setMode(thumbsAct->isChecked());
+        paneStack->setCurrentIndex(0);
+        detailAct->setChecked(false);
+        paneTree->setMouseTracking(false);
+        paneList->setMouseTracking(true);
+        if (paneTabs->count()) paneTabs->setType(1);
+        updateGrid();
+    } else {
+        currentView = 0;
+        paneList->setViewMode(QListView::ListMode);
+        paneList->setItemDelegate(ildelegate);
+        paneList->setGridSize(QSize());
+        paneList->setIconSize(QSize(zoomList, zoomList));
+        paneList->setFlow(QListView::TopToBottom);
+        modelList->setMode(thumbsAct->isChecked());
+        paneList->setMouseTracking(false);
+        if (paneTabs->count()) paneTabs->setType(0);
+    }
 
-    modelList->setMode(thumbsAct->isChecked());
-    stackWidget->setCurrentIndex(0);
-
-    detailAct->setChecked(0);
-    detailTree->setMouseTracking(false);
-    list->setMouseTracking(true);
-
-    if (tabs->count()) tabs->setType(1);
-    updateGrid();
-  } else {
-    currentView = 0;
-    list->setViewMode(QListView::ListMode);
-    list->setItemDelegate(ildelegate);
-    list->setGridSize(QSize());
-    list->setIconSize(QSize(zoomList, zoomList));
-    list->setFlow(QListView::TopToBottom);
-
-    modelList->setMode(thumbsAct->isChecked());
-    list->setMouseTracking(false);
-
-    if (tabs->count()) tabs->setType(0);
-  }
-
-  list->setDragDropMode(QAbstractItemView::DragDrop);
-  list->setDefaultDropAction(Qt::MoveAction);
+    paneList->setDragDropMode(QAbstractItemView::DragDrop);
+    paneList->setDefaultDropAction(Qt::MoveAction);
 }
-//---------------------------------------------------------------------------
+
+void MainWindow::setOnePane()
+{
+    folderSplitter->widget(1)->hide();
+    onePaneAction->setChecked(true);
+    twoPaneAction->setChecked(false);
+}
+
+void MainWindow::setTwoPanes()
+{
+    folderSplitter->widget(1)->show();
+    folderSplitter->setSizes(QList<int>() << 1 << 1);
+    onePaneAction->setChecked(false);
+    twoPaneAction->setChecked(true);
+}
 
 /**
  * @brief Sets sort column
@@ -947,11 +956,12 @@ void MainWindow::toggleIcons() {
  */
 void MainWindow::setSortColumn(QAction *columnAct) {
 
-  // Set root index
-  if (list->rootIndex() != modelList->index(pathEdit->currentText())) {
-    QModelIndex i = modelList->index(pathEdit->currentText());
-    list->setRootIndex(modelView->mapFromSource(i));
-  }
+	QListView *paneList = activePane == 2 ? list2 : list;
+	QString panePath = activePane == 2 ? panePath2 : panePath1;
+	QModelIndex root = modelView->mapFromSource(modelList->index(panePath));
+	if (paneList->rootIndex() != root) {
+	    paneList->setRootIndex(root);
+	}
 
   columnAct->setChecked(true);
 
@@ -964,7 +974,7 @@ void MainWindow::setSortColumn(QAction *columnAct) {
   }
   settings->setValue("sortBy", currentSortColumn);
 }
-//---------------------------------------------------------------------------
+
 
 /**
  * @brief Sets sort column
@@ -982,11 +992,12 @@ void MainWindow::toggleSortBy(QAction *action) {
  */
 void MainWindow::setSortOrder(Qt::SortOrder order) {
 
-  // Set root index
-  if (list->rootIndex() != modelList->index(pathEdit->currentText())) {
-    QModelIndex i = modelList->index(pathEdit->currentText());
-    list->setRootIndex(modelView->mapFromSource(i));
-  }
+ 	QListView *paneList = activePane == 2 ? list2 : list;
+	QString panePath = activePane == 2 ? panePath2 : panePath1;
+	QModelIndex root = modelView->mapFromSource(modelList->index(panePath));
+	if (paneList->rootIndex() != root) {
+	    paneList->setRootIndex(root);
+	}
 
   // Change sort order
   currentSortOrder = order;
@@ -1017,27 +1028,31 @@ void MainWindow::toggleThumbs() {
 /**
  * @brief Toggles details
  */
-void MainWindow::toggleDetails() {
-  if (detailAct->isChecked() == false) {
-    toggleIcons();
-    stackWidget->setCurrentIndex(0);
-    detailTree->setMouseTracking(false);
-  } else {
-    currentView = 2;
-    QModelIndex i = modelList->index(pathEdit->currentText());
-    if (detailTree->rootIndex() != i) {
-      detailTree->setRootIndex(modelView->mapFromSource(i));
+void MainWindow::toggleDetails()
+{
+    QListView *paneList = activePane == 2 ? list2 : list;
+    QTreeView *paneTree = activePane == 2 ? detailTree2 : detailTree;
+    QStackedWidget *paneStack = activePane == 2 ? stackWidget2 : stackWidget;
+    tabBar *paneTabs = activePane == 2 ? tabs2 : tabs;
+    QString panePath = activePane == 2 ? panePath2 : panePath1;
+
+    if (!detailAct->isChecked()) {
+        toggleIcons();
+        paneStack->setCurrentIndex(0);
+        paneTree->setMouseTracking(false);
+    } else {
+        currentView = 2;
+        QModelIndex root = modelView->mapFromSource(modelList->index(panePath));
+        if (paneTree->rootIndex() != root) {
+            paneTree->setRootIndex(root);
+        }
+        paneTree->setMouseTracking(true);
+        paneStack->setCurrentIndex(1);
+        modelList->setMode(thumbsAct->isChecked());
+        iconAct->setChecked(false);
+        if (paneTabs->count()) paneTabs->setType(2);
     }
-    detailTree->setMouseTracking(true);
-    stackWidget->setCurrentIndex(1);
-    modelList->setMode(thumbsAct->isChecked());
-    iconAct->setChecked(0);
-    if (tabs->count()) {
-      tabs->setType(2);
-    }
-  }
 }
-//---------------------------------------------------------------------------
 
 /**
  * @brief Hides/Shows hidden files
@@ -1076,10 +1091,7 @@ void MainWindow::showAboutBox()
                                    "This program is free software; you can redistribute it and/or modify"
                                    " it under the terms of the GNU General Public License as published by"
                                    " the Free Software Foundation; either version 2 of the License, or"
-                                   " (at your option) any later version.</p>"
-                                   "<p style=\"font-weight:bold;\">"
-                                   "<a href=\"https://qtfm.eu\">"
-                                   "https://qtfm.eu</a></p>"));
+                                   " (at your option) any later version.</p>"));
     QString details;
     QFile authorsFile(":/AUTHORS");
     if (authorsFile.open(QIODevice::Text|QIODevice::ReadOnly)) {

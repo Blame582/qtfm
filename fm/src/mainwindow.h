@@ -19,7 +19,6 @@
 *
 ****************************************************************************/
 
-
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -85,7 +84,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 public slots:
-    void treeSelectionChanged(QModelIndex,QModelIndex);
+    void treeSelectionChanged(QModelIndex, QModelIndex);
     void listSelectionChanged(const QItemSelection, const QItemSelection);
     void listDoubleClicked(QModelIndex);
     void lateStart();
@@ -135,7 +134,7 @@ public slots:
     void pasteLauncher(const QMimeData *data, const QString &newPath, const QStringList &cutList, bool link = false);
     void pasteLauncher(const QList<QUrl> &files, const QString &newPath, const QStringList &cutList, bool link = false);
     void pasteClipboard();
-    void progressFinished(int,QStringList);
+    void progressFinished(int, QStringList);
     void listItemClicked(QModelIndex);
     void listItemPressed(QModelIndex);
     void tabChanged(int index);
@@ -154,7 +153,7 @@ public slots:
     void updateDir();
     void handleReloadDir(const QString &path);
     void thumbUpdate(const QString &path);
-    void addressChanged(int,int);
+    void addressChanged(int, int);
     void loadSettings(bool wState = true, bool hState = true, bool tabState = true, bool thumbState = true);
     void firstRunBookmarks(bool isFirstRun);
     void loadBookmarks();
@@ -162,10 +161,14 @@ public slots:
     void handleBookmarksChanged();
     void firstRunCustomActions(bool isFirstRun);
     void showAboutBox();
+    void setOnePane();
+    void setTwoPanes();
+    void applyTheme(const QString &filename);
+    void updateActivePaneFrame();
 
 signals:
     void updateCopyProgress(qint64, qint64, QString);
-    void copyProgressFinished(int,QStringList);
+    void copyProgressFinished(int, QStringList);
 
 private slots:
     void readShortcuts();
@@ -173,6 +176,7 @@ private slots:
     void selectAppForFiles();
     void openInApp();
     void updateGrid();
+
     // libdisks
 #ifndef NO_UDISKS
     void populateMedia();
@@ -183,13 +187,15 @@ private slots:
     void handleMediaChanged(QString path, bool present);
     void handleMediaUnmount();
     void handleMediaEject();
-    void handleMediaError(QString path, QString error);
+    void handleMediaError(QString path, QString message);
 #endif
+
     void clearCache();
     void handlePathRequested(QString path);
     void slowPathEdit();
     void refresh(bool modelRefresh = true, bool loadDir = true);
     void enableReload();
+
 private:
     void createActions();
     void createActionIcons();
@@ -206,27 +212,37 @@ private:
     int zoomDetail;
     int zoomBook;
     int currentView;        // 0=list, 1=icons, 2=details
+    int activePane;         // 1=left folder pane, 2=right folder pane
     int currentSortColumn;  // 0=name, 1=size, 3=date
     Qt::SortOrder currentSortOrder;
 
     QCompleter *customComplete;
     tabBar *tabs;
+    tabBar *tabs2;
     MimeUtils *mimeUtils;
 
-    myProgressDialog * progress;
-    PropertiesDialog * properties;
+    myProgressDialog *progress;
+    PropertiesDialog *properties;
     QSettings *settings;
     QDockWidget *dockTree;
     QDockWidget *dockBookmarks;
     QVBoxLayout *mainLayout;
+
+    QSplitter *folderSplitter;
     QStackedWidget *stackWidget;
+    QStackedWidget *stackWidget2;
+
     QTreeView *tree;
     QTreeView *detailTree;
+    QTreeView *detailTree2;
     QListView *list;
+    QListView *list2;
     QListView *bookmarksList;
     QComboBox *pathEdit;
 
     QString term;
+    QString panePath1;
+    QString panePath2;
     QFileInfo curIndex;
     QModelIndex backIndex;
 
@@ -236,22 +252,23 @@ private:
     bookmarkmodel *modelBookmarks;
     QItemSelectionModel *treeSelectionModel;
     QItemSelectionModel *listSelectionModel;
+    QItemSelectionModel *listSelectionModel2;
     QStringList mounts;
 
     QList<QIcon> *actionIcons;
     QList<QAction*> *actionList;
     QList<QAction*> bookmarkActionList;
-    CustomActionsManager* customActManager;
+    CustomActionsManager *customActManager;
 
     //QToolBar *editToolBar;
     //QToolBar *viewToolBar;
     QToolBar *navToolBar;
     QToolBar *addressToolBar;
     QToolBar *menuToolBar;
-    QStatusBar * status;
-    QLabel * statusSize;
-    QLabel * statusName;
-    QLabel * statusDate;
+    QStatusBar *status;
+    QLabel *statusSize;
+    QLabel *statusName;
+    QLabel *statusDate;
     QString startPath;
 
     QAction *closeAct;
@@ -263,13 +280,15 @@ private:
     QAction *hiddenAct;
     QAction *filterAct;
     QAction *detailAct;
+    QAction *iconAct;
+    QAction *onePaneAction;
+    QAction *twoPaneAction;
     QAction *addBookmarkAct;
     QAction *addSeparatorAct;
     QAction *delBookmarkAct;
     QAction *editBookmarkAct;
     QAction *wrapBookmarksAct;
     QAction *deleteAct;
-    QAction *iconAct;
     QActionGroup *sortByActGrp;
     QAction *sortNameAct;
     QAction *sortDateAct;
@@ -305,16 +324,20 @@ private:
     QAction *tabsOnTopAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
+
 #ifndef NO_UDISKS
     QAction *mediaUnmountAct;
     QAction *mediaEjectAct;
 #endif
+
     QAction *trashAct;
     QAction *clearCacheAct;
+
     // libdisks
 #ifndef NO_UDISKS
     Disks *disks;
 #endif
+
     QString trashDir;
 
 #ifndef NO_DBUS
@@ -329,6 +352,7 @@ private:
 
     // copy of original new filename
     QString copyXof;
+
     // custom timestamp for copy of
     QString copyXofTS;
 
@@ -336,13 +360,16 @@ private:
 
     QVector<QString> progressQueue;
 
+    QWidget *activeFolderView() const;
+    QStackedWidget *activeStack() const;
+    tabBar *activeTabs() const;
+    QItemSelectionModel *activeSelectionModel() const;
+
+    QString activePath() const;
+    void setPanePath(const QString &path);
+
 protected:
     bool eventFilter(QObject *o, QEvent *e);
 };
-
-
-
-
-
 
 #endif

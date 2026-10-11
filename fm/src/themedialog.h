@@ -4,7 +4,6 @@
 #include <QDialog>
 
 class QListWidget;
-class QPushButton;
 
 class ThemeDialog : public QDialog
 {
@@ -14,14 +13,14 @@ public:
     explicit ThemeDialog(QWidget *parent = nullptr);
 
 private slots:
-    void applyTheme();
     void selectTheme(int row);
 
 private:
     void loadThemes();
-
     QListWidget *themeList;
-    QPushButton *applyButton;
+    
+signals:
+    void themeChanged(const QString &filename);   
 };
 
 #endif

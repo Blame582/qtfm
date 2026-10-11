@@ -41,6 +41,7 @@ public:
   ~myModel();
   void loadMimeTypes() const;
   void cacheInfo();
+  void setTheme(const QString &filename);
   void setMode(bool);
   void loadThumbs(QModelIndexList);
   void addCutItems(QStringList);
@@ -108,6 +109,12 @@ private:
   int thumbCount;
 
   QPalette colors;
+  bool colorFileNames;
+  QColor hiddenColor;
+  QColor symlinkColor;
+  QColor executableColor;
+  QColor cutColor;
+  
   QStringList cutItems;
   QHash<QString,QString> *mimeGlob;
   QHash<QString,QString> *mimeGeneric;
