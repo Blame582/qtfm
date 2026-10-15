@@ -10,7 +10,6 @@
 - Replaced legacy foreach loops with C++ range-based loops.
 - Fixed malformed foreach statements causing Qt6 build errors.
 - Cleaned up Qt6 compiler compatibility issues.
-- Verified successful Qt6 build with existing ImageMagick and FFmpeg support.
 
 
 6.2.1 - QT6 Port and modernization release.  12-Sept 2026
@@ -18,8 +17,6 @@
 - Updated build system/dependencies for Qt6
 - Updated documentation for Qt6
 - Updated icon-theme documentation
-- Updated ImageMagick support
-- Updated FFmpeg support
 - Removed obsolete Qt5 requirements
 - Bug fixes and cleanup
 
@@ -31,8 +28,6 @@
 - fix .desktop key/value parser
 
 6.2.0 05-June 2019
-- imagemagick support (improved thumbnail support) CONFIG+=with_magick
-- ffmpeg support (get thumbnails from audio/video) CONFIG+=with_ffmpeg
 - support for Qt4 has now ended
 - started moving code to lib
 - settings: use decimal keys in config

@@ -34,7 +34,6 @@ The port includes:
 * Updated source constructs required by modern Qt/C++
 * Fixes to command/action handling
 * Documentation and icon-theme updates
-* ImageMagick and FFmpeg compatibility updates
 * General source cleanup
 
 The project is intended to remain **desktop-independent** and usable on lightweight Linux systems.
@@ -46,8 +45,6 @@ The project is intended to remain **desktop-independent** and usable on lightwei
 
 Optional:
 
-* ImageMagick — image/thumbnail functionality where supported
-* FFmpeg — multimedia thumbnail support where supported
 
 No Qt5 installation is required.
 

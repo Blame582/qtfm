@@ -23,9 +23,8 @@ if [ "${SETUP}" = 1 ]; then
   rm -f download.tar.bz2 || true
   if [ "${OS}" = "Linux" ]; then
     echo "Setup ubuntu ..."
-    sudo add-apt-repository -y ppa:jonathonf/ffmpeg-3
     sudo apt-get update
-    sudo apt-get install tree git build-essential qtbase5-dev qt5-qmake libmagick++-dev libavdevice-dev libswscale-dev libavformat-dev libavcodec-dev libavutil-dev
+    sudo apt-get install -y tree git build-essential qt6-base-dev qt6-base-dev-tools qt6-multimedia-dev
     #curl -L https://sourceforge.net/projects/qt-file-manager/files/sdk/qtfm-sdk-trusty-6.1.tar.bz2/download --output download.tar.bz2
     #tar xf download.tar.bz2 -C /opt
     #rm -f download.tar.bz2
@@ -46,35 +45,35 @@ fi
 if [ "${OS}" = "Linux" ]; then
     mkdir $CWD/build1
     cd $CWD/build1
-    qmake -qt=qt5 CONFIG+=release PREFIX=/usr CONFIG+=with_magick CONFIG+=oldmagick CONFIG+=with_ffmpeg ..
+    qmake6 CONFIG+=release PREFIX=/usr ..
     make
     make INSTALL_ROOT=`pwd`/pkg install
     tree pkg
 
     mkdir $CWD/build2
     cd $CWD/build2
-    qmake -qt=qt5 CONFIG+=release CONFIG+=sharedlib LIBSUFFIX=64 PREFIX=/usr  ..
+    qmake6 CONFIG+=release CONFIG+=sharedlib LIBSUFFIX=64 PREFIX=/usr  ..
     make
     make INSTALL_ROOT=`pwd`/pkg install
     tree pkg
 
     mkdir $CWD/build3
     cd $CWD/build3
-    qmake -qt=qt5 CONFIG+=debug PREFIX=/usr  ..
+    qmake6 CONFIG+=debug PREFIX=/usr  ..
     make
     make INSTALL_ROOT=`pwd`/pkg install
     tree pkg
 
     mkdir $CWD/build5
     cd $CWD/build5
-    qmake -qt=qt5 CONFIG+=debug PREFIX=/usr CONFIG+=no_dbus ..
+    qmake6 CONFIG+=debug PREFIX=/usr CONFIG+=no_dbus ..
     make
     make INSTALL_ROOT=`pwd`/pkg install
     tree pkg
 
     mkdir $CWD/build7
     cd $CWD/build7
-    qmake -qt=qt5 CONFIG+=release PREFIX=/usr CONFIG+=no_dbus ..
+    qmake6 CONFIG+=release PREFIX=/usr CONFIG+=no_dbus ..
     make
     make INSTALL_ROOT=`pwd`/pkg install
     tree pkg

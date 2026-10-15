@@ -23,18 +23,7 @@
 #include <QApplication>
 #include "mainwindow.h"
 
-#ifdef WITH_MAGICK
-#include <Magick++.h>
-#endif
 
-#ifdef WITH_FFMPEG
-extern "C" {
-#include <libavutil/avutil.h>
-#include <libavutil/imgutils.h>
-#include <libavdevice/avdevice.h>
-#include <libswscale/swscale.h>
-}
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,16 +66,6 @@ int main(int argc, char *argv[]) {
 
   qInstallMessageHandler(msgHandler);
 
-#ifdef WITH_MAGICK
-  Magick::InitializeMagick(Q_NULLPTR);
-#endif
-#ifdef WITH_FFMPEG
-    avdevice_register_all();
-    avformat_network_init();
-#ifdef QT_NO_DEBUG
-    av_log_set_level(AV_LOG_QUIET);
-#endif
-#endif
 
   QApplication app(argc, argv);
   QApplication::setOrganizationName(APP);

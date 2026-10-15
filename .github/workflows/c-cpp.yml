@@ -14,12 +14,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: apt install
-      run: sudo apt-get install tree qt5-default qtbase5-dev libmagick++-dev libavdevice-dev libswscale-dev libavformat-dev libavcodec-dev libavutil-dev
+      run: sudo apt-get update && sudo apt-get install -y tree qt6-base-dev qt6-base-dev-tools qt6-multimedia-dev
     - name: Build (qmake release)
       run: |
         mkdir build
         cd build
-        qmake CONFIG+=with_magick CONFIG+=with_ffmpeg CONFIG+=release PREFIX=/usr ..
+        qmake6 CONFIG+=release PREFIX=/usr ..
         make -j2
         sudo make install
         ldd /usr/bin/qtfm
