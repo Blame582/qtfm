@@ -1,6 +1,6 @@
 include($${top_srcdir}/share/qtfm.pri)
 
-QT += widgets concurrent
+QT += widgets concurrent multimedia
 
 TARGET = QtFM
 VERSION = $${QTFM_MAJOR}.$${QTFM_MINOR}.$${QTFM_PATCH}
@@ -98,6 +98,3 @@ unix:!macx {
     !CONFIG(staticlib): INSTALLS += target
     CONFIG(with_includes): INSTALLS += target_inc
 }
-
-CONFIG(with_magick): include($${top_srcdir}/share/imagemagick.pri)
-CONFIG(with_ffmpeg): include($${top_srcdir}/share/ffmpeg.pri)

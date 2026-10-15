@@ -1,6 +1,6 @@
 include($${top_srcdir}/share/qtfm.pri)
 
-QT+= widgets concurrent
+QT+= widgets concurrent dbus multimedia
 
 TARGET = $${QTFM_TARGET}
 TARGET_NAME = $${QTFM_TARGET_NAME}
@@ -68,6 +68,3 @@ unix:!macx {
     !CONFIG(no_dbus) : QT += dbus
     !CONFIG(staticlib): QMAKE_RPATHDIR += $ORIGIN/../lib$${LIBSUFFIX}
 }
-
-CONFIG(with_magick): include($${top_srcdir}/share/imagemagick.pri)
-CONFIG(with_ffmpeg): include($${top_srcdir}/share/ffmpeg.pri)
